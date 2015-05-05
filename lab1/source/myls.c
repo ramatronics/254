@@ -20,7 +20,34 @@ int getfSize(struct dirent p_dirent);
 
 int main(int argc, char *argv[])
 {
-	printf("hello");
+	DIR *p_dir;
+	struct dirent *p_dirent;
+
+	if (argc == 1) {
+		printf("Usage: %s <directory name>\n", argv[0]);
+		exit(0);
+	}
+
+	if ((p_dir = opendir(argv[1])) == NULL) {
+		printf("opendir(%s) failed\n", argv[1]);
+		exit(1);
+	}
+
+	while ((p_dirent = readdir(p_dir)) != NULL) {
+		char *str_path = p_dirent->d_name;
+		
+		//Sample
+		char *permission = getfPermissions(p_dirent);
+
+		if (str_path == NULL) {
+			printf("Null pointer found!"); 
+			exit(2);
+		} else {
+			printf("%s\n", str_path);
+		}
+	}
+
+	return 0;
 }
 
 char* getfPermissions(struct dirent p_dirent){
