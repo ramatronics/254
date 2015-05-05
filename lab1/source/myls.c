@@ -9,7 +9,44 @@
 #include <time.h>           // for ctime()
 #include <string.h>         // for strlen()
 
+char* getfPermissions(struct dirent p_dirent);
+char* getfOwner(struct dirent p_dirent);
+char* getfGroupName(struct dirent p_dirent);
+char* getfTimeStampMD(struct dirent p_dirent);
+char* getfTimeStampHM(struct dirent p_dirent);
+char* getfSymbolicLink(struct dirent p_dirent);
+
+int getfSize(struct dirent p_dirent);
+
 int main(int argc, char *argv[])
 {
-	
+	printf("hello");
+}
+
+char* getfPermissions(struct dirent p_dirent){
+
+}
+
+char* getfOwner(struct dirent p_dirent){
+
+}
+
+char* getfGroupName(struct dirent p_dirent){
+
+}
+
+char* getfTimeStampMD(struct dirent p_dirent){
+
+}
+
+char* getfTimeStampHM(struct dirent p_dirent){
+
+}
+
+char* getfSymbolicLink(struct dirent p_dirent){
+
+}
+
+int getfSize(struct dirent p_dirent){
+
 }
