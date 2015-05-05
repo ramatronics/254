@@ -39,19 +39,35 @@ int main(int argc, char *argv[])
 		//Sample
 		char *permission = getfPermissions(p_dirent);
 
-		if (str_path == NULL) {
-			printf("Null pointer found!"); 
-			exit(2);
-		} else {
-			printf("%s\n", str_path);
-		}
+		// if (str_path == NULL) {
+		// 	printf("Null pointer found!"); 
+		// 	exit(2);
+		// } else {
+		// 	printf("%s\n", str_path);
+		// }
 	}
 
 	return 0;
 }
 
 char* getfPermissions(struct dirent *p_dirent){
+	char str[] = "---\0";
+	struct stat buf;
 
+	mode_t mode = buf.st_mode;
+
+	str[0] = (mode & S_IRUSR) ? 'r' : '-';
+	str[1] = (mode & S_IWUSR) ? 'w' : '-';
+	str[2] = (mode & S_IXUSR) ? 'x' : '-';
+	str[3] = (mode & S_IRGRP) ? 'r' : '_';
+	str[4] = (mode & S_IWGRP) ? 'w' : '_';
+	str[5] = (mode & S_IXGRP) ? 'x' : '_';
+	str[3] = (mode & S_IROTH) ? 'r' : '_';
+	str[4] = (mode & S_IWOTH) ? 'w' : '_';
+	str[5] = (mode & S_IXOTH) ? 'x' : '_';
+
+
+	printf("%s\n", str);
 }
 
 char* getfOwner(struct dirent p_dirent){
