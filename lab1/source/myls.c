@@ -10,12 +10,12 @@
 #include <string.h>         // for strlen()
 
 
-char* getfPermissions(struct dirent *p_dirent, char str[]);
+char* getfPermissions(char str[]);
 char* getfOwner(struct dirent *p_dirent);
 char* getfGroupName(struct dirent *p_dirent);
 char* getfTimeStampMD(struct dirent *p_dirent);
 char* getfTimeStampHM(struct dirent *p_dirent);
-char* getfSymbolicLink(struct dirent *p_dirent);
+char* getfSymbolicLink(char *str_path);
 
 
 int getfSize(struct dirent *p_dirent);
@@ -40,8 +40,8 @@ int main(int argc, char *argv[])
 		char *str_path = p_dirent->d_name;
 		
 		//Sample
-		char *permission = getfPermissions(p_dirent, permission_string);
-
+		char *permission = getfPermissions(permission_string);
+		char *symbolic_link = getfSymbolicLink(str_path);
 
 		// if (str_path == NULL) {
 		// 	printf("Null pointer found!"); 
@@ -54,7 +54,7 @@ int main(int argc, char *argv[])
 	return 0;
 }
 
-char* getfPermissions(struct dirent *p_dirent , char str[]){
+char* getfPermissions(char str[]){
 	
 	struct stat buf;
 
@@ -89,10 +89,22 @@ char* getfTimeStampHM(struct dirent *p_dirent){
 
 }
 
-char* getfSymbolicLink(struct dirent *p_dirent){
+char* getfSymbolicLink(char *str_path){
+	
+	char *arrow = "-->";
+    char linkname[256];
+    ssize_t r;
 
+    r = readlink(str_path, linkname, 256);
+   
+   	if(linkname < 0) {
+   		strcat(str_path, arrow);
+   		strcat(str_path, linkname);
+   	}
+   
+    return str_path;
 }
 
 int getfSize(struct dirent *p_dirent){
-
+	
 }
