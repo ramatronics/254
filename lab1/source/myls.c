@@ -9,7 +9,7 @@
 #include <time.h>           // for ctime()
 #include <string.h>         // for strlen()
 
-char* getfPermissions(struct dirent *p_dirent);
+char* getfPermissions(struct dirent *p_dirent, char str[]);
 char* getfOwner(struct dirent p_dirent);
 char* getfGroupName(struct dirent p_dirent);
 char* getfTimeStampMD(struct dirent p_dirent);
@@ -34,10 +34,12 @@ int main(int argc, char *argv[])
 	}
 
 	while ((p_dirent = readdir(p_dir)) != NULL) {
+		char permission_string[] = "--------\0";
 		char *str_path = p_dirent->d_name;
 		
 		//Sample
-		char *permission = getfPermissions(p_dirent);
+		char *permission = getfPermissions(p_dirent, permission_string);
+
 
 		// if (str_path == NULL) {
 		// 	printf("Null pointer found!"); 
@@ -50,8 +52,8 @@ int main(int argc, char *argv[])
 	return 0;
 }
 
-char* getfPermissions(struct dirent *p_dirent){
-	char str[] = "---\0";
+char* getfPermissions(struct dirent *p_dirent , char str[]){
+	
 	struct stat buf;
 
 	mode_t mode = buf.st_mode;
@@ -62,12 +64,11 @@ char* getfPermissions(struct dirent *p_dirent){
 	str[3] = (mode & S_IRGRP) ? 'r' : '_';
 	str[4] = (mode & S_IWGRP) ? 'w' : '_';
 	str[5] = (mode & S_IXGRP) ? 'x' : '_';
-	str[3] = (mode & S_IROTH) ? 'r' : '_';
-	str[4] = (mode & S_IWOTH) ? 'w' : '_';
-	str[5] = (mode & S_IXOTH) ? 'x' : '_';
+	str[6] = (mode & S_IROTH) ? 'r' : '_';
+	str[7] = (mode & S_IWOTH) ? 'w' : '_';
+	str[8] = (mode & S_IXOTH) ? 'x' : '_';
 
-
-	printf("%s\n", str);
+	return str;
 }
 
 char* getfOwner(struct dirent p_dirent){
