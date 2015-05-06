@@ -9,14 +9,16 @@
 #include <time.h>           // for ctime()
 #include <string.h>         // for strlen()
 
-char* getfPermissions(struct dirent *p_dirent, char str[]);
-char* getfOwner(struct dirent p_dirent);
-char* getfGroupName(struct dirent p_dirent);
-char* getfTimeStampMD(struct dirent p_dirent);
-char* getfTimeStampHM(struct dirent p_dirent);
-char* getfSymbolicLink(struct dirent p_dirent);
 
-int getfSize(struct dirent p_dirent);
+char* getfPermissions(struct dirent *p_dirent, char str[]);
+char* getfOwner(struct dirent *p_dirent);
+char* getfGroupName(struct dirent *p_dirent);
+char* getfTimeStampMD(struct dirent *p_dirent);
+char* getfTimeStampHM(struct dirent *p_dirent);
+char* getfSymbolicLink(struct dirent *p_dirent);
+
+
+int getfSize(struct dirent *p_dirent);
 
 int main(int argc, char *argv[])
 {
@@ -34,7 +36,7 @@ int main(int argc, char *argv[])
 	}
 
 	while ((p_dirent = readdir(p_dir)) != NULL) {
-		char permission_string[] = "--------\0";
+		char permission_string[] = "---------\0";
 		char *str_path = p_dirent->d_name;
 		
 		//Sample
@@ -71,26 +73,26 @@ char* getfPermissions(struct dirent *p_dirent , char str[]){
 	return str;
 }
 
-char* getfOwner(struct dirent p_dirent){
+char* getfOwner(struct dirent *p_dirent){
 
 }
 
-char* getfGroupName(struct dirent p_dirent){
+char* getfGroupName(struct dirent *p_dirent){
 
 }
 
-char* getfTimeStampMD(struct dirent p_dirent){
+char* getfTimeStampMD(struct dirent *p_dirent){
 
 }
 
-char* getfTimeStampHM(struct dirent p_dirent){
+char* getfTimeStampHM(struct dirent *p_dirent){
 
 }
 
-char* getfSymbolicLink(struct dirent p_dirent){
+char* getfSymbolicLink(struct dirent *p_dirent){
 
 }
 
-int getfSize(struct dirent p_dirent){
+int getfSize(struct dirent *p_dirent){
 
 }
