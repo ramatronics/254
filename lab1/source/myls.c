@@ -18,7 +18,7 @@ char* getfTimeStampHM(struct dirent *p_dirent);
 char* getfSymbolicLink(char *str_path);
 
 
-int getfSize(struct dirent *p_dirent);
+long long getfSize(char *str_path);
 
 int main(int argc, char *argv[])
 {
@@ -42,6 +42,7 @@ int main(int argc, char *argv[])
 		//Sample
 		char *permission = getfPermissions(permission_string, str_path);
 		char *symbolic_link = getfSymbolicLink(str_path);
+		long long file_size = getfSize(str_path);
 
 		// if (str_path == NULL) {
 		// 	printf("Null pointer found!"); 
@@ -118,6 +119,16 @@ char* getfSymbolicLink(char *str_path){
     return str_path;
 }
 
-int getfSize(struct dirent *p_dirent){
-	
+long long getfSize(char *str_path){
+
+	struct stat buf;
+
+	if (lstat(str_path, &buf) < 0) {
+		perror("lstat error");
+	} 
+
+	off_t file_size = buf.st_size;
+
+	//printf("%lld\n", file_size);
+	return file_size;
 }
