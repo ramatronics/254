@@ -10,7 +10,7 @@
 #include <string.h>         // for strlen()
 
 
-char* getfPermissions(char str[]);
+char* getfPermissions(char str[], char *str_path);
 char* getfOwner(struct dirent *p_dirent);
 char* getfGroupName(struct dirent *p_dirent);
 char* getfTimeStampMD(struct dirent *p_dirent);
@@ -36,11 +36,11 @@ int main(int argc, char *argv[])
 	}
 
 	while ((p_dirent = readdir(p_dir)) != NULL) {
-		char permission_string[] = "---------\0";
+		char permission_string[] = "----------\0";
 		char *str_path = p_dirent->d_name;
 		
 		//Sample
-		char *permission = getfPermissions(permission_string);
+		char *permission = getfPermissions(permission_string, str_path);
 		char *symbolic_link = getfSymbolicLink(str_path);
 
 		// if (str_path == NULL) {
@@ -54,21 +54,34 @@ int main(int argc, char *argv[])
 	return 0;
 }
 
-char* getfPermissions(char str[]){
-	
+char* getfPermissions(char str[], char *str_path){
+
 	struct stat buf;
 
+	if (lstat(str_path, &buf) < 0) {
+		perror("lstat error");
+	}   
+	
 	mode_t mode = buf.st_mode;
 
-	str[0] = (mode & S_IRUSR) ? 'r' : '-';
-	str[1] = (mode & S_IWUSR) ? 'w' : '-';
-	str[2] = (mode & S_IXUSR) ? 'x' : '-';
-	str[3] = (mode & S_IRGRP) ? 'r' : '_';
-	str[4] = (mode & S_IWGRP) ? 'w' : '_';
-	str[5] = (mode & S_IXGRP) ? 'x' : '_';
-	str[6] = (mode & S_IROTH) ? 'r' : '_';
-	str[7] = (mode & S_IWOTH) ? 'w' : '_';
-	str[8] = (mode & S_IXOTH) ? 'x' : '_';
+	//file type
+	switch (buf.st_mode & S_IFMT) {
+    case S_IFDIR:  str[0] = 'd';            break;
+    case S_IFLNK:  str[0] = 'l';            break;
+    case S_IFREG:  str[0] = '-';            break;
+    default:       str[0] = '?';            break;
+    }
+
+	//permission
+	str[1] = (mode & S_IRUSR) ? 'r' : '-';
+	str[2] = (mode & S_IWUSR) ? 'w' : '-';
+	str[3] = (mode & S_IXUSR) ? 'x' : '-';
+	str[4] = (mode & S_IRGRP) ? 'r' : '_';
+	str[5] = (mode & S_IWGRP) ? 'w' : '_';
+	str[6] = (mode & S_IXGRP) ? 'x' : '_';
+	str[7] = (mode & S_IROTH) ? 'r' : '_';
+	str[8] = (mode & S_IWOTH) ? 'w' : '_';
+	str[9] = (mode & S_IXOTH) ? 'x' : '_';
 
 	return str;
 }
