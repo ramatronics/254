@@ -11,8 +11,8 @@
 
 
 char* getfPermissions(char str[], char *str_path);
-char* getfOwner(struct dirent *p_dirent);
-char* getfGroupName(struct dirent *p_dirent);
+char* getfOwner(char *str_path);
+char* getfGroupName(char *str_path);
 char* getfTimeStampMD(struct dirent *p_dirent);
 char* getfTimeStampHM(struct dirent *p_dirent);
 char* getfSymbolicLink(char *str_path);
@@ -43,6 +43,8 @@ int main(int argc, char *argv[])
 		char *permission = getfPermissions(permission_string, str_path);
 		char *symbolic_link = getfSymbolicLink(str_path);
 		long long file_size = getfSize(str_path);
+		char *user_name = getfOwner(str_path);
+		char *group_name = getfGroupName(str_path);
 
 		// if (str_path == NULL) {
 		// 	printf("Null pointer found!"); 
@@ -87,12 +89,32 @@ char* getfPermissions(char str[], char *str_path){
 	return str;
 }
 
-char* getfOwner(struct dirent *p_dirent){
+char* getfOwner(char *str_path){
+	struct stat buf;
 
+	if (lstat(str_path, &buf) < 0) {
+		perror("lstat error");
+	} 
+
+	uid_t user_id = buf.st_uid;
+
+	//printf("%s\n", user_from_uid(user_id, 0));
+
+	return user_from_uid(user_id, 0);
 }
 
-char* getfGroupName(struct dirent *p_dirent){
+char* getfGroupName(char *str_path){
+	struct stat buf;
 
+	if (lstat(str_path, &buf) < 0) {
+		perror("lstat error");
+	} 
+
+	gid_t group_id = buf.st_gid;
+
+	printf("%s\n", group_from_gid(group_id, 0));
+
+	return group_from_gid(group_id, 0);
 }
 
 char* getfTimeStampMD(struct dirent *p_dirent){
