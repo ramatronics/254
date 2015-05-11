@@ -13,11 +13,12 @@
 char* getfPermissions(char str[], char *str_path);
 char* getfOwner(char *str_path);
 char* getfGroupName(char *str_path);
-char* getfTimeStampMD(struct dirent *p_dirent);
-char* getfTimeStampHM(struct dirent *p_dirent);
 char* getfSymbolicLink(char *str_path);
-
-
+char* getfTimeStamp(char *str_path, char* type);
+char* getfTimeM(time_t inTime);
+char* getfTimeD(time_t inTime);
+char* getfTimeHHMM(time_t inTime);
+time_t resolveTimeStamp(char* type, struct stat buf);
 long long getfSize(char *str_path);
 
 int main(int argc, char *argv[])
@@ -45,7 +46,8 @@ int main(int argc, char *argv[])
 		long long file_size = getfSize(str_path);
 		char *user_name = getfOwner(str_path);
 		char *group_name = getfGroupName(str_path);
-
+		
+		
 		// if (str_path == NULL) {
 		// 	printf("Null pointer found!"); 
 		// 	exit(2);
@@ -117,12 +119,47 @@ char* getfGroupName(char *str_path){
 	return group_from_gid(group_id, 0);
 }
 
-char* getfTimeStampMD(struct dirent *p_dirent){
-
+char* getfTimeStamp(char *str_path, char *type){
+	struct stat buf;
+	
+	if(lstat(str_path, &buf) < 0) {
+		perror("lstat error");
+	}
+	
+	time_t tmpTime = resolveTimeStamp(type, buf);
+	
+	char* result;
+	return result;
 }
 
-char* getfTimeStampHM(struct dirent *p_dirent){
+char* getfTimeM(time_t inTime){
+	char buff[3];
+	strftime(buff, 3, "%b", localtime(&inTime));
+	return buff;
+}
 
+char* getfTimeD(time_t inTime){
+	char buff[2];
+	strftime(buff, 2, "%e", localtime(&inTime));
+	return buff;
+}
+
+char* getfTimeHHMM(time_t inTime){
+	char buff[4];
+	strftime(buff, 4, "%H:%M", localtime(&inTime));
+	return buff;
+}
+
+time_t resolveTimeStamp(char* type, struct stat buf){
+	if(strcmp(type, "-u")){
+		return &buf.st_atime;
+	}else if(strcmp(type, "-c")){
+		return &buf.st_ctime;
+	}else if(strcmp(type, "-l")){
+		return &buf.st_mtime;
+	}else{		
+		perror(strcat("Unable to extract time from command: ", type));
+	}
 }
 
 char* getfSymbolicLink(char *str_path){
