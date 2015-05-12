@@ -36,6 +36,11 @@ int main(int argc, char *argv[]) {
         exit(1);
     }
 
+    if (argc != 3) {
+        printf("%s\n", "too many parameters");
+        exit(1);
+    }
+
     if (chdir(argv[2]) == -1) {
         exit(1);
     }
@@ -45,8 +50,8 @@ int main(int argc, char *argv[]) {
         exit(1);
     }
 
-    if (!strcmp(argv[1], "u") == 0 && !strcmp(argv[1], "c") == 0 && !strcmp(argv[1], "l") == 0) {
-        printf("Invalid timestamp option selected \n", argv[1]);
+    if (strcmp("-u", argv[1]) != 0 && strcmp("-c", argv[1]) != 0 && strcmp("-l", argv[1]) != 0){
+        printf("Invalid timestamp option selected %s \n", argv[1]);
         exit(1);
     }
 
@@ -74,15 +79,14 @@ int main(int argc, char *argv[]) {
             char timeHHMM[7];
             struct tm* time_data;
 
-            if (strcmp(argv[1], "u") == 0) {
+            if (strcmp(argv[1], "-u") == 0) {
                 time_data = localtime(&buf.st_atime);
-            } else if (strcmp(argv[1], "c") == 0) {
+            } else if (strcmp(argv[1], "-c") == 0) {
                 time_data = localtime(&buf.st_ctime);
-            } else if (strcmp(argv[1], "l") == 0) {
+            } else if (strcmp(argv[1], "-l") == 0) {
                 time_data = localtime(&buf.st_mtime);
             } else {
-
-                time_data = localtime(&buf.st_mtime);
+                exit(1);
             }
 
             strftime(timeM, 4, "%b", time_data);
@@ -103,7 +107,7 @@ char* getfPermissions(char str[], char *str_path) {
     struct stat buf;
 
     if (lstat(str_path, &buf) < 0) {
-        perror("lstat error 1");
+        perror("lstat error");
     }
 
     mode_t mode = buf.st_mode;
@@ -138,7 +142,6 @@ char* getfOwner(char *str_path) {
     struct stat buf;
 
     if (lstat(str_path, &buf) < 0) {
-       // perror("lstat error 2");
     }
 
     uid_t user_id = buf.st_uid;
@@ -152,7 +155,6 @@ char* getfGroupName(char *str_path) {
     struct stat buf;
 
     if (lstat(str_path, &buf) < 0) {
-     //   perror("lstat error 3");
     }
 
     gid_t group_id = buf.st_gid;
@@ -168,15 +170,8 @@ char* getfSymbolicLink(char *str_path) {
     char buf[1024];
     ssize_t len;
 
-<<<<<<< HEAD
     if ((len = readlink(str_path, buf, sizeof(buf)-1)) != -1){
         buf[len] = '\0';
-=======
-    r = readlink(str_path, linkname, 256);
-
-    if (linkname < 0) {
-
->>>>>>> cc23d4f2b7c9d59dcb7c9e450ad48ff679fa6084
         strcat(str_path, arrow);
         strcat(str_path, buf);
     }
@@ -189,7 +184,6 @@ long long getfSize(char *str_path) {
     struct stat buf;
 
     if (lstat(str_path, &buf) < 0) {
-      //  perror("lstat error 4");
     }
 
     off_t file_size = buf.st_size;
