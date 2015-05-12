@@ -69,11 +69,16 @@ int main(int argc, char *argv[]) {
             char timeHHMM[7];
             struct tm* time_data;
 
-            if (strcmp(argv[2], "u") == 0) {
+            char *ver = "u";
+            if(argc >= 2){
+                ver = argv[2];
+            }
+            
+            if (strcmp(ver, "u") == 0) {
                 time_data = localtime(&buf.st_atime);
-            } else if (strcmp(argv[2], "c") == 0) {
+            } else if (strcmp(ver, "c") == 0) {
                 time_data = localtime(&buf.st_ctime);
-            } else if (strcmp(argv[2], "l") == 0) {
+            } else if (strcmp(ver, "l") == 0) {
                 time_data = localtime(&buf.st_mtime);
             } else {
                 time_data = localtime(&buf.st_mtime);
