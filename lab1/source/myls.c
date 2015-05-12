@@ -22,168 +22,162 @@ char* getfTime(time_t inTime, int length, char* format);
 time_t resolveTimeStamp(char* ver, struct stat buf);
 long long getfSize(char *str_path);
 
-int main(int argc, char *argv[])
-{
-	DIR *p_dir;
-	struct dirent *p_dirent;
+int main(int argc, char *argv[]) {
+    DIR *p_dir;
+    struct dirent *p_dirent;
 
-	if (argc == 1) {
-		printf("Usage: %s <directory name>\n", argv[0]);
-		exit(0);
-	}
-
-	if ((p_dir = opendir(argv[1])) == NULL) {
-		printf("opendir(%s) failed\n", argv[1]);
-		exit(1);
-	}
-
-	if (chdir (argv[1]) == -1) {
-		exit(1);
-	}
-
-	while ((p_dirent = readdir(p_dir)) != NULL) {
-		char permission_string[] = "----------\0";
-		char *str_path = p_dirent->d_name;
-
-		struct stat buf;
-		
-		if(lstat(str_path, &buf) < 0) {
-			perror("lstat error");
-		}
-		
-		char *permission = getfPermissions(permission_string, str_path);
-		char *symbolic_link = getfSymbolicLink(str_path);
-		long long file_size = getfSize(str_path);
-		char *user_name = getfOwner(str_path);
-		char *group_name = getfGroupName(str_path);
-		time_t tmpTime = resolveTimeStamp("-u", buf);		
-		char *timeM = getfTimeM(tmpTime);
-		
-
-		printf("%s %s %s %s %lld %s \n", permission, user_name, group_name, timeM,file_size, symbolic_link);
-
-	}
-
-	return 0;
-}
-
-char* getfPermissions(char str[], char *str_path){
-
-	struct stat buf;
-
-	if (lstat(str_path, &buf) < 0) {
-		perror("lstat error");
-	}   
-	
-	mode_t mode = buf.st_mode;
-
-	//file type
-	switch (buf.st_mode & S_IFMT) {
-    case S_IFDIR:  str[0] = 'd';            break;
-    case S_IFLNK:  str[0] = 'l';            break;
-    case S_IFREG:  str[0] = '-';            break;
-    default:       str[0] = '?';            break;
+    //Windows testing
+    //argc = 2;
+    //argv[1] = "C:/Eclipse/";
+    //argv[2] = "u";
+    
+    if (argc == 1) {
+        printf("Usage: %s <directory name>\n", argv[0]);
+        exit(0);
     }
 
-	//permission
-	str[1] = (mode & S_IRUSR) ? 'r' : '-';
-	str[2] = (mode & S_IWUSR) ? 'w' : '-';
-	str[3] = (mode & S_IXUSR) ? 'x' : '-';
-	str[4] = (mode & S_IRGRP) ? 'r' : '-';
-	str[5] = (mode & S_IWGRP) ? 'w' : '-';
-	str[6] = (mode & S_IXGRP) ? 'x' : '-';
-	str[7] = (mode & S_IROTH) ? 'r' : '-';
-	str[8] = (mode & S_IWOTH) ? 'w' : '-';
-	str[9] = (mode & S_IXOTH) ? 'x' : '-';
+    if ((p_dir = opendir(argv[1])) == NULL) {
+        printf("opendir(%s) failed\n", argv[1]);
+        exit(1);
+    }
 
-	return str;
+    if (chdir(argv[1]) == -1) {
+        exit(1);
+    }
+
+    while ((p_dirent = readdir(p_dir)) != NULL) {
+        char permission_string[] = "----------\0";
+        char *str_path = p_dirent->d_name;
+
+        if (strcmp(str_path, "")) {
+            struct stat buf;
+
+            if (lstat(str_path, &buf) < 0) {
+                perror("lstat error");
+            }
+
+            char *permission = getfPermissions(permission_string, str_path);
+            char *symbolic_link = getfSymbolicLink(str_path);
+            long long file_size = getfSize(str_path);
+            char *user_name = getfOwner(str_path);
+            char *group_name = getfGroupName(str_path);
+
+            printf("%s\t%s\t%s\t%lld\t%s", permission, user_name, group_name, file_size, symbolic_link);
+
+            char timeM[4];
+            char timeD[3];
+            char timeHHMM[7];
+            struct tm* time_data;
+
+            if (strcmp(argv[2], "u") == 0) {
+                time_data = localtime(&buf.st_atime);
+            } else if (strcmp(argv[2], "c") == 0) {
+                time_data = localtime(&buf.st_ctime);
+            } else if (strcmp(argv[2], "l") == 0) {
+                time_data = localtime(&buf.st_mtime);
+            } else {
+                time_data = localtime(&buf.st_mtime);
+            }
+
+            strftime(timeM, 4, "%b", time_data);
+            strftime(timeD, 3, "%e", time_data);
+            strftime(timeHHMM, 7, "%H:%M", time_data);
+
+            printf("\t%s\t%s\t%s", timeM, timeD, timeHHMM);
+            printf("\n");
+        }
+    }
+
+    return 0;
 }
 
-char* getfOwner(char *str_path){
-	struct stat buf;
+char* getfPermissions(char str[], char *str_path) {
 
-	if (lstat(str_path, &buf) < 0) {
-		perror("lstat error");
-	} 
+    struct stat buf;
 
-	uid_t user_id = buf.st_uid;
+    if (lstat(str_path, &buf) < 0) {
+        perror("lstat error");
+    }
 
-	struct passwd *owner =  getpwuid(user_id);
-	return owner->pw_name;
+    mode_t mode = buf.st_mode;
+
+    //file type
+    switch (buf.st_mode & S_IFMT) {
+        case S_IFDIR: str[0] = 'd';
+            break;
+        case S_IFLNK: str[0] = 'l';
+            break;
+        case S_IFREG: str[0] = '-';
+            break;
+        default: str[0] = '?';
+            break;
+    }
+
+    //permission
+    str[1] = (mode & S_IRUSR) ? 'r' : '-';
+    str[2] = (mode & S_IWUSR) ? 'w' : '-';
+    str[3] = (mode & S_IXUSR) ? 'x' : '-';
+    str[4] = (mode & S_IRGRP) ? 'r' : '-';
+    str[5] = (mode & S_IWGRP) ? 'w' : '-';
+    str[6] = (mode & S_IXGRP) ? 'x' : '-';
+    str[7] = (mode & S_IROTH) ? 'r' : '-';
+    str[8] = (mode & S_IWOTH) ? 'w' : '-';
+    str[9] = (mode & S_IXOTH) ? 'x' : '-';
+
+    return str;
 }
 
-char* getfGroupName(char *str_path){
-	struct stat buf;
+char* getfOwner(char *str_path) {
+    struct stat buf;
 
-	if (lstat(str_path, &buf) < 0) {
-		perror("lstat error");
-	} 
+    if (lstat(str_path, &buf) < 0) {
+        perror("lstat error");
+    }
 
-	gid_t group_id = buf.st_gid;
+    uid_t user_id = buf.st_uid;
 
-	struct group *group_name = getgrgid(group_id);
-	return group_name->gr_name;
+    struct passwd *owner = getpwuid(user_id);
+    return owner->pw_name;
 }
 
-char* getfTimeM(time_t inTime){
-	return getfTime(inTime, 3, "%b");
+char* getfGroupName(char *str_path) {
+    struct stat buf;
+
+    if (lstat(str_path, &buf) < 0) {
+        perror("lstat error");
+    }
+
+    gid_t group_id = buf.st_gid;
+
+    struct group *group_name = getgrgid(group_id);
+    return group_name->gr_name;
 }
 
-char* getfTimeD(time_t inTime){
-	return getfTime(inTime, 2, "%e");
-}
+char* getfSymbolicLink(char *str_path) {
 
-char* getfTimeHHMM(time_t inTime){
-	return getfTime(inTime, 4, "%H:%M");
-}
-
-char* getfTime(time_t inTime, int length, char* format){
-	char buff[length];
-	strftime(buff, length, format, localtime(&inTime));
-	
-	char* rtnData;
-	rtnData = (char*) &buff;
-	return rtnData;
-}
-
-time_t resolveTimeStamp(char* ver, struct stat buf){
-	if(strcmp(ver, "-u")){
-		return buf.st_atime;
-	}else if(strcmp(ver, "-c")){
-		return buf.st_ctime;
-	}else if(strcmp(ver, "-l")){
-		return buf.st_mtime;
-	}else{		
-		return buf.st_mtime;
-		//perror(strcat("Unable to extract time from command: ", ver));
-	}
-}
-
-char* getfSymbolicLink(char *str_path){
-	
-	char *arrow = "-->";
+    char *arrow = "-->";
     char linkname[256];
     ssize_t r;
 
     r = readlink(str_path, linkname, 256);
-   
-   	if(linkname < 0) {
-   		strcat(str_path, arrow);
-   		strcat(str_path, linkname);
-   	}
-   
+
+    if (linkname < 0) {
+        strcat(str_path, arrow);
+        strcat(str_path, linkname);
+    }
+
     return str_path;
 }
 
-long long getfSize(char *str_path){
+long long getfSize(char *str_path) {
 
-	struct stat buf;
+    struct stat buf;
 
-	if (lstat(str_path, &buf) < 0) {
-		perror("lstat error");
-	} 
+    if (lstat(str_path, &buf) < 0) {
+        perror("lstat error");
+    }
 
-	off_t file_size = buf.st_size;
+    off_t file_size = buf.st_size;
 
-	return file_size;
+    return file_size;
 }
