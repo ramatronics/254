@@ -53,7 +53,7 @@ int main(int argc, char *argv[]) {
             struct stat buf;
 
             if (lstat(str_path, &buf) < 0) {
-                perror("lstat error");
+                continue;
             }
 
             char *permission = getfPermissions(permission_string, str_path);
@@ -97,7 +97,7 @@ char* getfPermissions(char str[], char *str_path) {
     struct stat buf;
 
     if (lstat(str_path, &buf) < 0) {
-        perror("lstat error");
+        perror("lstat error 1");
     }
 
     mode_t mode = buf.st_mode;
@@ -132,7 +132,7 @@ char* getfOwner(char *str_path) {
     struct stat buf;
 
     if (lstat(str_path, &buf) < 0) {
-        perror("lstat error");
+       // perror("lstat error 2");
     }
 
     uid_t user_id = buf.st_uid;
@@ -145,7 +145,7 @@ char* getfGroupName(char *str_path) {
     struct stat buf;
 
     if (lstat(str_path, &buf) < 0) {
-        perror("lstat error");
+     //   perror("lstat error 3");
     }
 
     gid_t group_id = buf.st_gid;
@@ -156,15 +156,14 @@ char* getfGroupName(char *str_path) {
 
 char* getfSymbolicLink(char *str_path) {
 
-    char *arrow = "-->";
-    char linkname[256];
-    ssize_t r;
+    char *arrow = "->";
+    char buf[1024];
+    ssize_t len;
 
-    r = readlink(str_path, linkname, 256);
-
-    if (linkname < 0) {
+    if ((len = readlink(str_path, buf, sizeof(buf)-1)) != -1){
+        buf[len] = '\0';
         strcat(str_path, arrow);
-        strcat(str_path, linkname);
+        strcat(str_path, buf);
     }
 
     return str_path;
@@ -175,7 +174,7 @@ long long getfSize(char *str_path) {
     struct stat buf;
 
     if (lstat(str_path, &buf) < 0) {
-        perror("lstat error");
+      //  perror("lstat error 4");
     }
 
     off_t file_size = buf.st_size;
