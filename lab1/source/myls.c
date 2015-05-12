@@ -27,7 +27,7 @@ int main(int argc, char *argv[]) {
     struct dirent *p_dirent;
 
     if (argc == 1) {
-        printf("Usage: %s <directory name>\n", argv[0]);
+        printf("Usage: %s <directory name> -<a,c,l>\n", argv[0]);
         exit(0);
     }
 
@@ -36,12 +36,17 @@ int main(int argc, char *argv[]) {
         exit(1);
     }
 
-    if ((p_dir = opendir(argv[2])) == NULL) {
-        printf("opendir(%s) failed\n", argv[1]);
+    if (chdir(argv[2]) == -1) {
         exit(1);
     }
 
-    if (chdir(argv[2]) == -1) {
+    if ((p_dir = opendir(argv[2])) == NULL) {
+        printf("opendir(%s) failed\n", argv[2]);
+        exit(1);
+    }
+
+    if (!strcmp(argv[1], "u") == 0 && !strcmp(argv[1], "c") == 0 && !strcmp(argv[1], "l") == 0) {
+        printf("Invalid timestamp option selected \n", argv[1]);
         exit(1);
     }
 
@@ -68,7 +73,7 @@ int main(int argc, char *argv[]) {
             char timeD[3];
             char timeHHMM[7];
             struct tm* time_data;
-            
+
             if (strcmp(argv[1], "u") == 0) {
                 time_data = localtime(&buf.st_atime);
             } else if (strcmp(argv[1], "c") == 0) {
@@ -76,6 +81,7 @@ int main(int argc, char *argv[]) {
             } else if (strcmp(argv[1], "l") == 0) {
                 time_data = localtime(&buf.st_mtime);
             } else {
+
                 time_data = localtime(&buf.st_mtime);
             }
 
@@ -138,6 +144,7 @@ char* getfOwner(char *str_path) {
     uid_t user_id = buf.st_uid;
 
     struct passwd *owner = getpwuid(user_id);
+
     return owner->pw_name;
 }
 
@@ -151,6 +158,7 @@ char* getfGroupName(char *str_path) {
     gid_t group_id = buf.st_gid;
 
     struct group *group_name = getgrgid(group_id);
+
     return group_name->gr_name;
 }
 
@@ -163,6 +171,7 @@ char* getfSymbolicLink(char *str_path) {
     r = readlink(str_path, linkname, 256);
 
     if (linkname < 0) {
+
         strcat(str_path, arrow);
         strcat(str_path, linkname);
     }
