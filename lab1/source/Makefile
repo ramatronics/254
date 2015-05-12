@@ -10,9 +10,9 @@ LDFLAGS=-g
 
 OBJS1=myls.o
 
-all: myls.out
+all: myls
 
-myls.out: $(OBJS1) 
+myls: $(OBJS1) 
 	$(LD) $(LDFLAGS) -o $@ $^
 
 .c.o:
