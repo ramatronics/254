@@ -18,7 +18,8 @@ char* getfTimeStamp(char *str_path, char* type);
 char* getfTimeM(time_t inTime);
 char* getfTimeD(time_t inTime);
 char* getfTimeHHMM(time_t inTime);
-time_t resolveTimeStamp(char* type, struct stat buf);
+char* getfTime(time_t inTime, int length, char* format);
+time_t resolveTimeStamp(char* ver, struct stat buf);
 long long getfSize(char *str_path);
 
 int main(int argc, char *argv[])
@@ -44,14 +45,25 @@ int main(int argc, char *argv[])
 		char permission_string[] = "----------\0";
 		char *str_path = p_dirent->d_name;
 		
-		//Sample
+		
 		char *permission = getfPermissions(permission_string, str_path);
 		char *symbolic_link = getfSymbolicLink(str_path);
 		long long file_size = getfSize(str_path);
 		char *user_name = getfOwner(str_path);
 		char *group_name = getfGroupName(str_path);
 		
+
 		printf("%s %s %s %lld %s \n", permission, user_name, group_name, file_size, symbolic_link);
+
+		struct stat buf;
+		
+		if(lstat(str_path, &buf) < 0) {
+			perror("lstat error");
+		}
+		
+		time_t tmpTime = resolveTimeStamp("-u", buf);		
+		printf(getfTimeM(tmpTime));		
+
 	}
 
 	return 0;
@@ -115,46 +127,37 @@ char* getfGroupName(char *str_path){
 	return group_name->gr_name;
 }
 
-char* getfTimeStamp(char *str_path, char *type){
-	struct stat buf;
-	
-	if(lstat(str_path, &buf) < 0) {
-		perror("lstat error");
-	}
-	
-	time_t tmpTime = resolveTimeStamp(type, buf);
-	
-	char* result;
-	return result;
-}
-
 char* getfTimeM(time_t inTime){
-	char buff[3];
-	strftime(buff, 3, "%b", localtime(&inTime));
-	return buff;
+	return getfTime(inTime, 3, "%b");
 }
 
 char* getfTimeD(time_t inTime){
-	char buff[2];
-	strftime(buff, 2, "%e", localtime(&inTime));
-	return buff;
+	return getfTime(inTime, 2, "%e");
 }
 
 char* getfTimeHHMM(time_t inTime){
-	char buff[4];
-	strftime(buff, 4, "%H:%M", localtime(&inTime));
-	return buff;
+	return getfTime(inTime, 4, "%H:%M");
 }
 
-time_t resolveTimeStamp(char* type, struct stat buf){
-	if(strcmp(type, "-u")){
-		return &buf.st_atime;
-	}else if(strcmp(type, "-c")){
-		return &buf.st_ctime;
-	}else if(strcmp(type, "-l")){
-		return &buf.st_mtime;
+char* getfTime(time_t inTime, int length, char* format){
+	char buff[length];
+	strftime(buff, length, format, localtime(&inTime));
+	
+	char* rtnData;
+	rtnData = (char*) &buff;
+	return rtnData;
+}
+
+time_t resolveTimeStamp(char* ver, struct stat buf){
+	if(strcmp(ver, "-u")){
+		return buf.st_atime;
+	}else if(strcmp(ver, "-c")){
+		return buf.st_ctime;
+	}else if(strcmp(ver, "-l")){
+		return buf.st_mtime;
 	}else{		
-		perror(strcat("Unable to extract time from command: ", type));
+		return buf.st_mtime;
+		//perror(strcat("Unable to extract time from command: ", ver));
 	}
 }
 
