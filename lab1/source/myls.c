@@ -26,22 +26,22 @@ int main(int argc, char *argv[]) {
     DIR *p_dir;
     struct dirent *p_dirent;
 
-    //Windows testing
-    //argc = 2;
-    //argv[1] = "C:/Eclipse/";
-    //argv[2] = "u";
-
     if (argc == 1) {
         printf("Usage: %s <directory name>\n", argv[0]);
         exit(0);
     }
 
-    if ((p_dir = opendir(argv[1])) == NULL) {
+    if (argc == 2) {
+        printf("%s\n", "parameters are missing");
+        exit(1);
+    }
+
+    if ((p_dir = opendir(argv[2])) == NULL) {
         printf("opendir(%s) failed\n", argv[1]);
         exit(1);
     }
 
-    if (chdir(argv[1]) == -1) {
+    if (chdir(argv[2]) == -1) {
         exit(1);
     }
 
@@ -68,17 +68,12 @@ int main(int argc, char *argv[]) {
             char timeD[3];
             char timeHHMM[7];
             struct tm* time_data;
-
-            char *ver = "u";
-            if(argc >= 2){
-                ver = argv[2];
-            }
             
-            if (strcmp(ver, "u") == 0) {
+            if (strcmp(argv[1], "u") == 0) {
                 time_data = localtime(&buf.st_atime);
-            } else if (strcmp(ver, "c") == 0) {
+            } else if (strcmp(argv[1], "c") == 0) {
                 time_data = localtime(&buf.st_ctime);
-            } else if (strcmp(ver, "l") == 0) {
+            } else if (strcmp(argv[1], "l") == 0) {
                 time_data = localtime(&buf.st_mtime);
             } else {
                 time_data = localtime(&buf.st_mtime);
