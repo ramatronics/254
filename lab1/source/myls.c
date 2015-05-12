@@ -44,16 +44,6 @@ int main(int argc, char *argv[])
 	while ((p_dirent = readdir(p_dir)) != NULL) {
 		char permission_string[] = "----------\0";
 		char *str_path = p_dirent->d_name;
-		
-		
-		char *permission = getfPermissions(permission_string, str_path);
-		char *symbolic_link = getfSymbolicLink(str_path);
-		long long file_size = getfSize(str_path);
-		char *user_name = getfOwner(str_path);
-		char *group_name = getfGroupName(str_path);
-		
-
-		printf("%s %s %s %lld %s \n", permission, user_name, group_name, file_size, symbolic_link);
 
 		struct stat buf;
 		
@@ -61,8 +51,16 @@ int main(int argc, char *argv[])
 			perror("lstat error");
 		}
 		
+		char *permission = getfPermissions(permission_string, str_path);
+		char *symbolic_link = getfSymbolicLink(str_path);
+		long long file_size = getfSize(str_path);
+		char *user_name = getfOwner(str_path);
+		char *group_name = getfGroupName(str_path);
 		time_t tmpTime = resolveTimeStamp("-u", buf);		
-		printf(getfTimeM(tmpTime));		
+		char *timeM = getfTimeM(tmpTime);
+		
+
+		printf("%s %s %s %s %lld %s \n", permission, user_name, group_name, timeM,file_size, symbolic_link);
 
 	}
 
