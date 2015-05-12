@@ -36,6 +36,10 @@ int main(int argc, char *argv[])
 		exit(1);
 	}
 
+	if (chdir (argv[1]) == -1) {
+		exit(1);
+	}
+
 	while ((p_dirent = readdir(p_dir)) != NULL) {
 		char permission_string[] = "----------\0";
 		char *str_path = p_dirent->d_name;
@@ -47,13 +51,7 @@ int main(int argc, char *argv[])
 		char *user_name = getfOwner(str_path);
 		char *group_name = getfGroupName(str_path);
 		
-		
-		// if (str_path == NULL) {
-		// 	printf("Null pointer found!"); 
-		// 	exit(2);
-		// } else {
-		// 	printf("%s\n", str_path);
-		// }
+		printf("%s %s %s %lld %s \n", permission, user_name, group_name, file_size, symbolic_link);
 	}
 
 	return 0;
@@ -81,12 +79,12 @@ char* getfPermissions(char str[], char *str_path){
 	str[1] = (mode & S_IRUSR) ? 'r' : '-';
 	str[2] = (mode & S_IWUSR) ? 'w' : '-';
 	str[3] = (mode & S_IXUSR) ? 'x' : '-';
-	str[4] = (mode & S_IRGRP) ? 'r' : '_';
-	str[5] = (mode & S_IWGRP) ? 'w' : '_';
-	str[6] = (mode & S_IXGRP) ? 'x' : '_';
-	str[7] = (mode & S_IROTH) ? 'r' : '_';
-	str[8] = (mode & S_IWOTH) ? 'w' : '_';
-	str[9] = (mode & S_IXOTH) ? 'x' : '_';
+	str[4] = (mode & S_IRGRP) ? 'r' : '-';
+	str[5] = (mode & S_IWGRP) ? 'w' : '-';
+	str[6] = (mode & S_IXGRP) ? 'x' : '-';
+	str[7] = (mode & S_IROTH) ? 'r' : '-';
+	str[8] = (mode & S_IWOTH) ? 'w' : '-';
+	str[9] = (mode & S_IXOTH) ? 'x' : '-';
 
 	return str;
 }
@@ -100,9 +98,8 @@ char* getfOwner(char *str_path){
 
 	uid_t user_id = buf.st_uid;
 
-	//printf("%s\n", user_from_uid(user_id, 0));
-
-	return user_from_uid(user_id, 0);
+	struct passwd *owner =  getpwuid(user_id);
+	return owner->pw_name;
 }
 
 char* getfGroupName(char *str_path){
@@ -114,9 +111,8 @@ char* getfGroupName(char *str_path){
 
 	gid_t group_id = buf.st_gid;
 
-	printf("%s\n", group_from_gid(group_id, 0));
-
-	return group_from_gid(group_id, 0);
+	struct group *group_name = getgrgid(group_id);
+	return group_name->gr_name;
 }
 
 char* getfTimeStamp(char *str_path, char *type){
@@ -188,6 +184,5 @@ long long getfSize(char *str_path){
 
 	off_t file_size = buf.st_size;
 
-	//printf("%lld\n", file_size);
 	return file_size;
 }
