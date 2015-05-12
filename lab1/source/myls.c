@@ -30,7 +30,7 @@ int main(int argc, char *argv[]) {
     //argc = 2;
     //argv[1] = "C:/Eclipse/";
     //argv[2] = "u";
-    
+
     if (argc == 1) {
         printf("Usage: %s <directory name>\n", argv[0]);
         exit(0);
@@ -62,7 +62,7 @@ int main(int argc, char *argv[]) {
             char *user_name = getfOwner(str_path);
             char *group_name = getfGroupName(str_path);
 
-            printf("%s\t%s\t%s\t%lld\t%s", permission, user_name, group_name, file_size, symbolic_link);
+            printf("%s\t%s\t%s\t%lld", permission, user_name, group_name, file_size);
 
             char timeM[4];
             char timeD[3];
@@ -84,6 +84,7 @@ int main(int argc, char *argv[]) {
             strftime(timeHHMM, 7, "%H:%M", time_data);
 
             printf("\t%s\t%s\t%s", timeM, timeD, timeHHMM);
+            printf("\t%s", symbolic_link);
             printf("\n");
         }
     }
