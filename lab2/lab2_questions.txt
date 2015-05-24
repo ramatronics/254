@@ -1,0 +1,8 @@
+1)
+It is an array of active task pointers
+
+2)
+No
+
+3)
+At index n-1
