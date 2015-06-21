@@ -1,0 +1,6 @@
+-c --cpu Cortex-M3 -D__EVAL --li -g -O0 --apcs=interwork --split_sections
+-I C:\Keil\ARM\RV31\INC
+-I C:\Keil\ARM\CMSIS\Include
+-I C:\Keil\ARM\Inc\NXP\LPC17xx
+-DDBG_MSG
+-o .\cm3_le\rt_task.o --omf_browse .\cm3_le\rt_task.crf --depend .\cm3_le\rt_task.d "SRC\CM\rt_Task.c"

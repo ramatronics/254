@@ -19,33 +19,64 @@
 #include "rt_HAL_CM.h"
 #include "rt_Task_ext.h"
 
-/*----------------------------------------------------------------------------
- *      Global Variables
- *---------------------------------------------------------------------------*/
-
-
-/*----------------------------------------------------------------------------
- *      Local Functions
- *---------------------------------------------------------------------------*/
-/*--------------------------- rt_tsk_count_get ------------------------------*/
-/* added in ECE254 lab2 keil_rtx */
-int rt_tsk_count_get (void) {
-	/* Add your own code here. Change the following line accordingly */
-	return 0;
+U8 rt_tsk_stack_usage(P_TCB t){	
+	U32 sSize;	
+	sSize = t->priv_stack >> 2;
+	
+	if(sSize == 0)
+		sSize = (U16)os_stackinfo >> 2;
+	
+	//(End-Current)/(End-Start)
+	return ((t->stack[sSize] - t->tsk_stack)/(t->stack[sSize] - t->stack[0]))*100;
+	
+//	int sSize = (U16)os_stackinfo;		
+//	int sEnd = (U32)t->stack;	
+//	int sCurrent = t->state == 2 ? rt_get_PSP() : t->tsk_stack;
+//	
+//	return (100 - (((sCurrent-sEnd)/sSize) * 100));	
+//	return 100 - ((((t->state == 2 ? rt_get_PSP() : t->tsk_stack)-((U32)t->stack))/((U16)os_stackinfo)) * 100);
 }
 
-/*--------------------------- rt_tsk_get ------------------------------------*/
-/* added in ECE254 lab3 keil_proc */
-OS_RESULT rt_tsk_get (OS_TID task_id, RL_TASK_INFO *p_task_info) {
-	/* Add your own code here. Change the following lines accordingly */
-	p_task_info->task_id     = task_id;
-	p_task_info->state       = INACTIVE;
-	p_task_info->prio        = 99;
-	p_task_info->stack_usage = 15;
-	p_task_info->ptask       = NULL;
+int rt_tsk_count_get (void) {
+		//Counter for total number of tasks running
+    int totalTasks = 0;	
+    int i = 0;
+    
+		//Pointer for iterating through tasks
+    P_TCB currTask;
+	
+    for(i=0; i < os_maxtaskrun; i++){
+				//Get task at index i as P_TCB
+        currTask = os_active_TCB[i];
+        
+				//Check if task is null/exists
+        if(currTask != 0){					
+						//Increment counter if state isn't inactive
+            if(currTask->state != INACTIVE){
+                totalTasks++;
+            }
+        }
+    }
+    
+    return totalTasks;
+}
+
+OS_RESULT rt_tsk_get (OS_TID task_id, RL_TASK_INFO *p_task_info) {	
+	P_TCB t;
+	
+	if(task_id < 1 || task_id > os_maxtaskrun)
+		return OS_R_NOK;
+	
+	if((P_TCB)os_active_TCB[task_id - 1] == NULL)
+		return OS_R_NOK;
+	
+	t = (P_TCB)os_active_TCB[task_id - 1];
+
+	p_task_info->task_id     = t->task_id;
+	p_task_info->state       = t->state;
+	p_task_info->prio        = t->prio;
+	p_task_info->ptask       = t->ptask;	
+	p_task_info->stack_usage = rt_tsk_stack_usage(t);
+	
 	return OS_R_OK;
 }
-
-/*----------------------------------------------------------------------------
- * end of file
- *---------------------------------------------------------------------------*/
