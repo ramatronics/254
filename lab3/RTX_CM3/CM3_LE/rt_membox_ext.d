@@ -4,5 +4,6 @@
 .\cm3_le\rt_membox_ext.o: SRC\CM\rt_System.h
 .\cm3_le\rt_membox_ext.o: SRC\CM\rt_MemBox.h
 .\cm3_le\rt_membox_ext.o: SRC\CM\rt_HAL_CM.h
+.\cm3_le\rt_membox_ext.o: SRC\CM\rt_List.h
 .\cm3_le\rt_membox_ext.o: SRC\CM\rt_Task.h
 .\cm3_le\rt_membox_ext.o: SRC\CM\rt_MemBox_ext.h

@@ -23,8 +23,6 @@ typedef struct rl_task_info {
 /* Variables */
 
 /* Functions */
-U8 rt_tsk_stack_usage(P_TCB t);
-
 /* added in ECE254 lab2 keil_proc */
 extern int rt_tsk_count_get(void);
 

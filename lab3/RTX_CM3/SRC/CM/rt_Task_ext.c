@@ -19,24 +19,6 @@
 #include "rt_HAL_CM.h"
 #include "rt_Task_ext.h"
 
-U8 rt_tsk_stack_usage(P_TCB t){	
-	U32 sSize;	
-	sSize = t->priv_stack >> 2;
-	
-	if(sSize == 0)
-		sSize = (U16)os_stackinfo >> 2;
-	
-	//(End-Current)/(End-Start)
-	return ((t->stack[sSize] - t->tsk_stack)/(t->stack[sSize] - t->stack[0]))*100;
-	
-//	int sSize = (U16)os_stackinfo;		
-//	int sEnd = (U32)t->stack;	
-//	int sCurrent = t->state == 2 ? rt_get_PSP() : t->tsk_stack;
-//	
-//	return (100 - (((sCurrent-sEnd)/sSize) * 100));	
-//	return 100 - ((((t->state == 2 ? rt_get_PSP() : t->tsk_stack)-((U32)t->stack))/((U16)os_stackinfo)) * 100);
-}
-
 int rt_tsk_count_get (void) {
 		//Counter for total number of tasks running
     int totalTasks = 0;	
@@ -63,6 +45,8 @@ int rt_tsk_count_get (void) {
 
 OS_RESULT rt_tsk_get (OS_TID task_id, RL_TASK_INFO *p_task_info) {	
 	P_TCB t;
+	U32 sSize, sAddrStart, sAddrEnd, sAddrCurr;
+	U32 *sStart, *sEnd;
 	
 	if(task_id < 1 || task_id > os_maxtaskrun)
 		return OS_R_NOK;
@@ -76,7 +60,19 @@ OS_RESULT rt_tsk_get (OS_TID task_id, RL_TASK_INFO *p_task_info) {
 	p_task_info->state       = t->state;
 	p_task_info->prio        = t->prio;
 	p_task_info->ptask       = t->ptask;	
-	p_task_info->stack_usage = rt_tsk_stack_usage(t);
+
+	sSize = t->priv_stack >> 2;
+	if(sSize == 0)
+		sSize = (U16)os_stackinfo >> 2;
+	
+	sStart = &t->stack[0];
+	sEnd = &t->stack[sSize];
+	
+	sAddrStart = (U32)sStart;
+	sAddrEnd = (U32)sEnd;
+	sAddrCurr = (U32)t->tsk_stack;
+	
+	p_task_info->stack_usage = (U8)((sAddrEnd - sAddrCurr)*100/(sAddrEnd - sAddrStart));
 	
 	return OS_R_OK;
 }

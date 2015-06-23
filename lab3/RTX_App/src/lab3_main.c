@@ -196,5 +196,5 @@ int main(void)
 	g_task_map[0].p = os_idle_demon;
   
 	printf("Calling os_sys_init()...\n");
-	os_sys_init(init);    /* initilize the OS and start the first task */
+  os_sys_init(init);    /* initilize the OS and start the first task */
 }
