@@ -28,8 +28,7 @@
 /*----------------------------------------------------------------------------
  *      Global Variables
  *---------------------------------------------------------------------------*/
-struct OS_XCB os_task_list;
-int  initializeTaskList = 0;
+struct OS_XCB blocking_list;
 /*----------------------------------------------------------------------------
  *      Global Functions
  *---------------------------------------------------------------------------*/
@@ -44,19 +43,11 @@ int  initializeTaskList = 0;
    @brief: Blocking memory allocation routine.
  */
 void *rt_alloc_box_s (void *p_mpool) {
-	int* ptr;
+	void* ptr = rt_alloc_box(p_mpool);
 	
-	if(initializeTaskList == 0){
-		os_task_list.cb_type = TCB;
-		os_task_list.p_lnk = NULL;
-		initializeTaskList = 1;
-	}
-		
-	ptr = rt_alloc_box(p_mpool);
-	
-	if(ptr == NULL){
-		rt_put_prio(&os_task_list, os_tsk.run);
-		rt_block(0xffff, 10);
+	if(ptr == NULL){		
+			rt_put_prio(&blocking_list, os_tsk.run);
+			rt_block(0xffff, 10);
 	}
 	
 	return ptr;
@@ -72,15 +63,17 @@ void *rt_alloc_box_s (void *p_mpool) {
 OS_RESULT rt_free_box_s (void *p_mpool, void *box) {
 	P_TCB t;
 	
+	if (box < p_mpool || box >= ((P_BM) p_mpool)->end) {
+    return OS_R_NOK;
+  }
+	
 	if(rt_free_box(p_mpool, box)){
 		return OS_R_NOK;
 	}
 	
-	if(os_task_list.p_lnk != NULL){
-		t = rt_get_first(&os_task_list);
-		t->ret_val = (U32)box;
-		t->state = READY;
-		
+	if(blocking_list.p_lnk != NULL){		
+		t = rt_get_first(&blocking_list);		
+		t->ret_val = (U32)box;		
 		rt_dispatch(t);
 	}
 	
