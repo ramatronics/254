@@ -3,7 +3,7 @@
 <title>Static Call Graph - [.\build\FLASH\RTX_APP.axf]</title></head>
 <body><HR>
 <H1>Static Call Graph for image .\build\FLASH\RTX_APP.axf</H1><HR>
-<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 5.03 [Build 76]: Last Updated: Thu Jun 25 21:12:06 2015
+<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 5.03 [Build 76]: Last Updated: Thu Jun 25 21:24:51 2015
 <BR><P>
 <H3>Maximum Stack Usage =        160 bytes + Unknown(Functions without stacksize, Cycles, Untraceable Function Pointers)</H3><H3>
 Call chain for Maximum Stack Depth:</H3>
@@ -588,7 +588,7 @@ Global Symbols
 <BR><BR>[Calls]<UL><LI><a href="#[69]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;uart_put_char
 </UL>
 
-<P><STRONG><a name="[6f]"></a>state2str</STRONG> (Thumb, 140 bytes, Stack size 16 bytes, lab3_main.o(.text))
+<P><STRONG><a name="[6f]"></a>state2str</STRONG> (Thumb, 152 bytes, Stack size 16 bytes, lab3_main.o(.text))
 <BR><BR>[Stack]<UL><LI>Max Depth = 28<LI>Call Chain = state2str &rArr; strcpy
 </UL>
 <BR>[Calls]<UL><LI><a href="#[70]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;strcpy
@@ -651,7 +651,7 @@ Global Symbols
 <BR>[Address Reference Count : 2]<UL><LI> lab3_main.o(.data)
 <LI> lab3_main.o(.text)
 </UL>
-<P><STRONG><a name="[46]"></a>init</STRONG> (Thumb, 882 bytes, Stack size 32 bytes, lab3_main.o(.text))
+<P><STRONG><a name="[46]"></a>init</STRONG> (Thumb, 892 bytes, Stack size 32 bytes, lab3_main.o(.text))
 <BR><BR>[Stack]<UL><LI>Max Depth = 160 + Unknown Stack Size
 <LI>Call Chain = init &rArr; __2printf &rArr; _printf_char_file &rArr; _printf_char_common &rArr; __printf
 </UL>
@@ -800,7 +800,7 @@ Global Symbols
 </UL>
 <BR>[Address Reference Count : 1]<UL><LI> hal_cm3.o(.emb_text)
 </UL>
-<P><STRONG><a name="[36]"></a>rt_alloc_box_s</STRONG> (Thumb, 38 bytes, Stack size 16 bytes, rt_membox_ext.o(i.rt_alloc_box_s))
+<P><STRONG><a name="[36]"></a>rt_alloc_box_s</STRONG> (Thumb, 54 bytes, Stack size 16 bytes, rt_membox_ext.o(i.rt_alloc_box_s))
 <BR><BR>[Stack]<UL><LI>Max Depth = 48<LI>Call Chain = rt_alloc_box_s &rArr; rt_block &rArr; rt_put_dly
 </UL>
 <BR>[Calls]<UL><LI><a href="#[81]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;rt_put_prio

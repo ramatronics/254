@@ -318,6 +318,9 @@ char *state2str(unsigned char state, char *str)
 	case WAIT_MUT:
 		strcpy(str, "WAIT_MUT");
 		break;
+	case WAIT_MEM:
+		strcpy(str, "WAIT_MEM");
+		break;
 	default:
 		strcpy(str, "UNKNOWN");    
 	}
