@@ -45,17 +45,20 @@ int rt_tsk_count_get (void) {
 
 OS_RESULT rt_tsk_get (OS_TID task_id, RL_TASK_INFO *p_task_info) {	
 	P_TCB t;
-	U32 sSize, sAddrStart, sAddrEnd, sAddrCurr;
+	U32 sSize, sAddrEnd, sAddrCurr;
 	U32 *sStart, *sEnd;
 	
-	if(task_id < 1 || task_id > os_maxtaskrun)
+	if(task_id < 1 || task_id > os_maxtaskrun && task_id != 0xFF)
 		return OS_R_NOK;
 	
 	if((P_TCB)os_active_TCB[task_id - 1] == NULL)
 		return OS_R_NOK;
 	
-	t = (P_TCB)os_active_TCB[task_id - 1];
+	t = task_id == 0xFF ? (P_TCB)&os_idle_TCB : (P_TCB)os_active_TCB[task_id - 1];
 
+	if(p_task_info == NULL || t == NULL)
+		return OS_R_NOK;
+		
 	p_task_info->task_id     = t->task_id;
 	p_task_info->state       = t->state;
 	p_task_info->prio        = t->prio;
@@ -68,11 +71,10 @@ OS_RESULT rt_tsk_get (OS_TID task_id, RL_TASK_INFO *p_task_info) {
 	sStart = &t->stack[0];
 	sEnd = &t->stack[sSize];
 	
-	sAddrStart = (U32)sStart;
-	sAddrEnd = (U32)sEnd;
-	sAddrCurr = (U32)t->tsk_stack;
+	sAddrEnd = (U32)sEnd;	
+	sAddrCurr = t->state == RUNNING ? rt_get_PSP() : (U32)t->tsk_stack;
 	
-	p_task_info->stack_usage = (U8)((sAddrEnd - sAddrCurr)*100/(sAddrEnd - sAddrStart));
+	p_task_info->stack_usage = (U32)((sAddrEnd - sAddrCurr)*100/(U16)os_stackinfo);
 	
 	return OS_R_OK;
 }

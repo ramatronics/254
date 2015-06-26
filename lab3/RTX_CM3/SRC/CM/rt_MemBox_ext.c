@@ -73,8 +73,11 @@ OS_RESULT rt_free_box_s (void *p_mpool, void *box) {
 	
 	if(blocking_list.p_lnk != NULL){		
 		t = rt_get_first(&blocking_list);		
-		t->ret_val = (U32)box;		
-		rt_dispatch(t);
+		
+		if(t != NULL){
+			t->ret_val = (U32)box;		
+			rt_dispatch(t);		
+		}
 	}
 	
 	return OS_R_OK;
