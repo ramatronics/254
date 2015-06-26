@@ -10,3 +10,4 @@
 .\build\flash\lab3_main.o: src\../../RTX_CM3/INC/RTL_ext.h
 .\build\flash\lab3_main.o: C:\Keil\ARM\ARMCC\bin\..\include\stdio.h
 .\build\flash\lab3_main.o: C:\Keil\ARM\ARMCC\bin\..\include\string.h
+.\build\flash\lab3_main.o: src\../../RTX_CM3/SRC/CM/RTX_Config.h

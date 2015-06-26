@@ -46,8 +46,13 @@ void *rt_alloc_box_s (void *p_mpool) {
 	void* ptr = rt_alloc_box(p_mpool);
 	
 	if(ptr == NULL){		
+		if(blocking_list.p_lnk == NULL){
+			blocking_list.p_lnk = os_tsk.run;
+		}else{
 			rt_put_prio(&blocking_list, os_tsk.run);
-			rt_block(0xffff, 10);
+		}
+		
+		rt_block(0xffff, 10);
 	}
 	
 	return ptr;
@@ -75,7 +80,8 @@ OS_RESULT rt_free_box_s (void *p_mpool, void *box) {
 		t = rt_get_first(&blocking_list);		
 		
 		if(t != NULL){
-			t->ret_val = (U32)box;		
+			t->ret_val = (U32)box;	
+			t->state = READY;
 			rt_dispatch(t);		
 		}
 	}

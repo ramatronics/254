@@ -48,7 +48,7 @@ OS_RESULT rt_tsk_get (OS_TID task_id, RL_TASK_INFO *p_task_info) {
 	U32 sSize, sAddrEnd, sAddrCurr;
 	U32 *sStart, *sEnd;
 	
-	if(task_id < 1 || task_id > os_maxtaskrun && task_id != 0xFF)
+	if((task_id < 1 || task_id > os_maxtaskrun) && task_id != 0xFF)
 		return OS_R_NOK;
 	
 	if((P_TCB)os_active_TCB[task_id - 1] == NULL)
@@ -60,7 +60,7 @@ OS_RESULT rt_tsk_get (OS_TID task_id, RL_TASK_INFO *p_task_info) {
 		return OS_R_NOK;
 		
 	p_task_info->task_id     = t->task_id;
-	p_task_info->state       = t->state;
+ 	p_task_info->state       = t->state;
 	p_task_info->prio        = t->prio;
 	p_task_info->ptask       = t->ptask;	
 
