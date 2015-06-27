@@ -11,9 +11,15 @@
 #include "../../RTX_CM3/INC/RTL_ext.h" /* extended interface header file */
 #include <stdio.h>
 #include <string.h>
-#include "../../RTX_CM3/SRC/CM/RTX_Config.h"
 
 #define NUM_FNAMES 8
+
+const U32 bSize = 8;
+const U32 pSize = sizeof(U64);
+const U32 pCount = 10;
+const U32 tWait = 1;
+
+_declare_box8(mpool, pSize, pCount);
 
 struct func_info {
   void (*p)();      /* function pointer */
@@ -21,7 +27,7 @@ struct func_info {
 };
 
 extern void os_idle_demon(void);
-//__task void task1(void);
+__task void task1(void);
 __task void task2(void);
 __task void task3(void);
 __task void task4(void);
@@ -29,11 +35,6 @@ __task void task5(void);
 __task void task6(void);
 __task void init (void);
  
-const U32 msize = sizeof(U64);
-const U32 cnt = 10;
-
-_declare_box8(mympool, msize, cnt);
-
 char *state2str(unsigned char state, char *str);
 char *fp2name(void (*p)(), char *str);
 
@@ -48,167 +49,197 @@ struct func_info g_task_map[NUM_FNAMES] = \
 {
   /* os_idle_demon function ptr to be initialized in main */
   {NULL,  "os_idle_demon"}, \
-/*  {task1, "task1"},   \*/
+  {task1, "task1"},   \
   {task2, "task2"},   \
   {task3, "task3"},   \
   {task4, "task4"},   \
-  {task5, "task5"},   \
-  {task6, "task6"},   \
   {init,  "init" }
 };
 
-/* no local variables defined, use one global var */
-/*__task void task1(void)
-{
-	for (;;) {
-		g_counter++;
-	}
-}
-*/
-
-/*--------------------------- task2 -----------------------------------*/
+/*--------------------------- task1 -----------------------------------*/
 /* checking states of all tasks in the system                          */
 /*---------------------------------------------------------------------*/
-
-__task void task2(void)
-{
+__task void task1(void)
+{	
 	U8 i=1;
 	RL_TASK_INFO task_info;
 	
- for(;;)
- {
-	os_mut_wait(g_mut_uart, 0xFFFF);
-	printf("TID\tNAME\t\tPRIO\tSTATE   \t%%STACK\n");
-	os_mut_release(g_mut_uart);
+	while(1){
+		
+		os_mut_wait(g_mut_uart, 0xFFFF);
+		printf("\n--------------------------------------\n");
+		printf("TID\tNAME\t\tPRIO\tSTATE   \t%%STACK\n");
+		os_mut_release(g_mut_uart);
+		
+		for(i = 0; i < NUM_FNAMES - 1; i++) { // this is a lazy way of doing loop.
+			if (os_tsk_get(i+1, &task_info) == OS_R_OK) {
+				os_mut_wait(g_mut_uart, 0xFFFF);  
+				printf("%d\t%s\t\t%d\t%s\t%d%%\n", \
+							 task_info.task_id, \
+							 fp2name(task_info.ptask, g_tsk_name), \
+							 task_info.prio, \
+							 state2str(task_info.state, g_str),  \
+							 task_info.stack_usage);
+				os_mut_release(g_mut_uart);
+			} 
+		}
+	
     
-	for(i = 0; i < os_maxtaskrun; i++) { // this is a lazy way of doing loop.
-		if (os_tsk_get(i+1, &task_info) == OS_R_OK) {
+		if (os_tsk_get(0xFF, &task_info) == OS_R_OK) {
 			os_mut_wait(g_mut_uart, 0xFFFF);  
 			printf("%d\t%s\t\t%d\t%s\t%d%%\n", \
-			       task_info.task_id, \
-			       fp2name(task_info.ptask, g_tsk_name), \
-			       task_info.prio, \
-			       state2str(task_info.state, g_str),  \
-			       task_info.stack_usage);
+						 task_info.task_id, \
+						 fp2name(task_info.ptask, g_tsk_name), \
+						 task_info.prio, \
+						 state2str(task_info.state, g_str),  \
+						 task_info.stack_usage);
 			os_mut_release(g_mut_uart);
-		} 
-	}
-    
-	if (os_tsk_get(0xFF, &task_info) == OS_R_OK) {
-		os_mut_wait(g_mut_uart, 0xFFFF);  
-		printf("%d\t%s\t\t%d\t%s\t%d%%\n", \
-		       task_info.task_id, \
-		       fp2name(task_info.ptask, g_tsk_name), \
-		       task_info.prio, \
-		       state2str(task_info.state, g_str),  \
-		       task_info.stack_usage);
+		}
+		
+		os_mut_wait(g_mut_uart, 0xFFFF);
+		printf("\n--------------------------------------\n");
 		os_mut_release(g_mut_uart);
-	}			
- }	
+		
+		os_dly_wait(5*tWait);
+	}
+}
+
+
+/*--------------------------- task2 -----------------------------------*/
+/* Acquire memory with no wait                       									 */
+/*---------------------------------------------------------------------*/
+__task void task2(void)
+{
+	int i;
+	void* buffer[bSize];
+	
+	os_mut_wait(g_mut_uart, 0xFFFF);
+	printf("task2 allocating memory:\n");
+	os_mut_release(g_mut_uart);
+	
+	for (i = 0; i < bSize; i++) {
+		buffer[i] = os_mem_alloc(&mpool);
+		
+		os_mut_wait(g_mut_uart, 0xFFFF);
+		printf("task2 allocated block %d\n", i);
+		os_mut_release(g_mut_uart);
+	}
+	
+	os_mut_wait(g_mut_uart, 0xFFFF);
+	printf("task2 waiting...\n");	
+	os_mut_release(g_mut_uart);
+	
+	os_dly_wait(10*tWait);
+	
+	os_mut_wait(g_mut_uart, 0xFFFF);
+	printf("task2 freeing memory:\n");
+	os_mut_release(g_mut_uart);
+	
+	for (i = 0; i < bSize; i++) {
+		
+		os_mut_wait(g_mut_uart, 0xFFFF);
+		printf("task2 freeing block %d\n", i);
+		os_mut_release(g_mut_uart);
+		
+		os_mem_free(&mpool, buffer[i]);
+	}
+	
+	os_mut_wait(g_mut_uart, 0xFFFF);
+	printf("task2 exit\n");
+	os_mut_release(g_mut_uart);
+	
+	os_tsk_delete_self();
 }
 
 
 /*--------------------------- task3 -----------------------------------*/
-/*  A task can allocate a fixed size of memory                                                                   */
+/* Acquire memory with wait                       									   */
 /*---------------------------------------------------------------------*/
 __task void task3(void)
 {
-
-	const int mpool_size = 8;
-	void* mpool[mpool_size];
 	int i;
+	void* buffer[bSize];
 	
-	for(i = 0; i<mpool_size;i++) {
-		printf("Allocating memory block %d\n",i);
-		mpool[i] = os_mem_alloc(&mympool);
-		printf("Finished Allocating block %d",i);
+	os_mut_wait(g_mut_uart, 0xFFFF);
+	printf("task3 allocating memory:\n");
+	os_mut_release(g_mut_uart);
+	
+	for (i = 0; i < bSize; i++) {
+		buffer[i] = os_mem_alloc(&mpool);
+		
+		os_mut_wait(g_mut_uart, 0xFFFF);
+		printf("task3 allocated block %d\n", i);
+		os_mut_release(g_mut_uart);
 	}
 	
+	os_mut_wait(g_mut_uart, 0xFFFF);
+	printf("task3 waiting...\n");
+	os_mut_release(g_mut_uart);
 	
-	for(i = 0;i<mpool_size;i++) {
-		printf("Freeing memory block %d",i);
-		os_mem_free(&mympool,mpool[i]);
+	os_dly_wait(10*tWait);
+	
+	os_mut_wait(g_mut_uart, 0xFFFF);
+	printf("task3 freeing memory:\n");
+	os_mut_release(g_mut_uart);
+	
+	for (i = 0; i < bSize; i++) {
+		os_mut_wait(g_mut_uart, 0xFFFF);
+		printf("task3 freeing block %d\n", i);
+		os_mut_release(g_mut_uart);
+		
+		os_mem_free(&mpool, buffer[i]);
 	}
 	
-}	
+	os_mut_wait(g_mut_uart, 0xFFFF);
+	printf("task3 exit\n");
+	os_mut_release(g_mut_uart);
+	
+	os_tsk_delete_self();
+}
 
 /*--------------------------- task4 -----------------------------------*/
-/* A task will get blocked if there is no memory available when        */
-/*   os_mem_alloc() icalled.                                           */
+/* Acquire memory with wait and offset                   							 */
 /*---------------------------------------------------------------------*/
 __task void task4(void)
 {
-
-	const int mpool_size = 8;
-	void* mpool[mpool_size];
 	int i;
+	void* buffer[bSize];
 	
-	for(i = 0; i<mpool_size;i++) {
-		printf("Allocating memory block %d\n",i);
-		mpool[i] = os_mem_alloc(&mympool);
-		printf("Finished Allocating block %d",i);
+	os_mut_wait(g_mut_uart, 0xFFFF);
+	printf("task4 allocating memory:\n");
+	os_mut_release(g_mut_uart);
+	
+	for (i = 0; i < bSize; i++) {
+		buffer[i] = os_mem_alloc(&mpool);
+		
+		os_mut_wait(g_mut_uart, 0xFFFF);
+		printf("task4 allocated block %d\n", i);
+		os_mut_release(g_mut_uart);
 	}
 	
+	os_mut_wait(g_mut_uart, 0xFFFF);
+	printf("task4 waiting...\n");
+	os_mut_release(g_mut_uart);
 	
+	os_dly_wait(10*tWait);
 	
-	for(i = 0;i<mpool_size;i++) {
-		printf("Freeing memory block %d",i);
-		os_mem_free(&mympool,mpool[i]);
+	os_mut_wait(g_mut_uart, 0xFFFF);
+	printf("task4 freeing memory:\n");
+	os_mut_release(g_mut_uart);
+	
+	for (i = 0; i < bSize; i++) {
+		os_mut_wait(g_mut_uart, 0xFFFF);
+		printf("task4 freeing block %d\n", i);
+		os_mut_release(g_mut_uart);
+		
+		os_mem_free(&mpool, buffer[i]);
 	}
 	
-}	
-
-/*--------------------------- task5 -----------------------------------*/
-/* A blocked on memory task will be resumed once enough memory is      */
-/*  available in thesystem.                                            */
-/*---------------------------------------------------------------------*/
-__task void task5(void)
-{
-
-	const int mpool_size = 8;
-	void* mpool[mpool_size];
-	int i;
+	os_mut_wait(g_mut_uart, 0xFFFF);
+	printf("task4 exit\n");
+	os_mut_release(g_mut_uart);
 	
-	for(i = 0; i<mpool_size;i++) {
-		printf("Allocating memory block %d\n",i);
-		mpool[i] = os_mem_alloc(&mympool);
-		printf("Finished Allocating block %d",i);
-	}
-	
-	
-	
-	for(i = 0;i<mpool_size;i++) {
-		printf("Freeing memory block %d",i);
-		os_mem_free(&mympool,mpool[i]);
-	}
-	
-}	
-
-/*--------------------------- task6 -----------------------------------*/
-/* Create a testing scenario that multiple tasks with dfferent priorities are all blocked */
-/*waiting for memory. When memory becomes available, test whether it is the highest*/
-/*priority task that waits the longest that gets the memory first.*/                                
-/*---------------------------------------------------------------------*/
-__task void task6(void)
-{
-
-	const int mpool_size = 8;
-	void* mpool[mpool_size];
-	int i;
-	
-	for(i = 0; i<mpool_size;i++) {
-		printf("Allocating memory block %d\n",i);
-		mpool[i] = os_mem_alloc(&mympool);
-		printf("Finished Allocating block %d",i);
-	}
-	
-	
-	
-	for(i = 0;i<mpool_size;i++) {
-		printf("Freeing memory block %d",i);
-		os_mem_free(&mympool,mpool[i]);
-	}
-	
+	os_tsk_delete_self();
 }	
 
 /*--------------------------- init ------------------------------------*/
@@ -216,67 +247,78 @@ __task void task6(void)
 /*---------------------------------------------------------------------*/
 __task void init(void)
 {
-	const int mpool_size = 8;
-	void* mpool[mpool_size];
 	int i;
-
-	_init_box8(&mympool, msize*cnt, msize);
-	
+	void* buffer[bSize];
+	_init_box8(&mpool, pSize*pCount, pSize);
+		
 	os_mut_init(&g_mut_uart);
   
+	printf("Initializing memory allocation:\n");
+	for(i=0; i<bSize; i++){
+		buffer[i] = os_mem_alloc(&mpool);
+		printf("Allocated block %d \n", i);
+	}
 	
-	//Using up the entire memory
-	for (i = 0; i < mpool_size; i++) {
-		mpool[i] = os_mem_alloc(&mympool);
-		printf("Allocating Memory Block %d\n", i);
-	}	
-	
-  
-	os_mut_wait(g_mut_uart, 0x00FF);
+	os_mut_wait(g_mut_uart, 0xFFFF);
 	printf("init: TID = %d\n", os_tsk_self());
 	os_mut_release(g_mut_uart);
   
-	/*g_tid = os_tsk_create(task1, 7);  // task 1 has a  prio = 7 
+	//Display tasks at the beginning
+	g_tid = os_tsk_create(task1, 100);  /* task 1 at priority 1 */
 	os_mut_wait(g_mut_uart, 0xFFFF);
 	printf("init: created task1 with TID %d\n", g_tid);
-	os_mut_release(g_mut_uart);*/
+	os_mut_release(g_mut_uart);
   
-	g_tid = os_tsk_create(task2, 1);  // task 2 has a  prio = 1 
+	//Memory acquiring tasks
+	g_tid = os_tsk_create(task2, 3);  /* task 2 at priority 1 */
 	os_mut_wait(g_mut_uart, 0xFFFF);
-	printf("task2 created with TID %d\n", g_tid);
+	printf("init: created task2 with TID %d\n", g_tid);
 	os_mut_release(g_mut_uart);
 	
-	g_tid = os_tsk_create(task3, 3);  // task 3 has a  prio = 3  
+	g_tid = os_tsk_create(task3, 1);  /* task 3 at priority 2 */
 	os_mut_wait(g_mut_uart, 0xFFFF);
-	printf("task3 created with TID %d\n", g_tid);
+	printf("init: created task3 with TID %d\n", g_tid);
 	os_mut_release(g_mut_uart);
 	
-	g_tid = os_tsk_create(task4, 2);  // task 4 has a  prio = 2 
+	os_dly_wait(5*tWait);
+	
+	g_tid = os_tsk_create(task4, 2);  /* task 4 at priority 3 */
 	os_mut_wait(g_mut_uart, 0xFFFF);
-	printf("task4 created with TID %d\n", g_tid);
-	os_mut_release(g_mut_uart);
-	
-	g_tid = os_tsk_create(task5, 4);  // task 5 has a  prio = 4 
+	printf("init: created task4 with TID %d\n", g_tid);
+	os_mut_release(g_mut_uart);	
+
 	os_mut_wait(g_mut_uart, 0xFFFF);
-	printf("task5 created with TID %d\n", g_tid);
-	os_mut_release(g_mut_uart);
+	printf("Waiting to close initialize method");
+	os_mut_release(g_mut_uart);	
 	
-	g_tid = os_tsk_create(task6, 4);  // task 6 has a  prio = 4 
+	os_dly_wait(20*tWait);
+	
 	os_mut_wait(g_mut_uart, 0xFFFF);
-	printf("task6 created with TID %d\n", g_tid);
-	os_mut_release(g_mut_uart);
+	printf("Starting to free memory:\n");
+	os_mut_release(g_mut_uart);	
 	
-	printf("Entering Delay");
-	os_dly_wait(5);
-	
-	printf("Freeing Allocated Memory Blocks\n");
- 	for (i = 0; i < mpool_size; i++) {
-    os_mem_free(&mympool, mpool[i]);
+	for (i = 0; i < bSize; i++) {
+		
+		os_mut_wait(g_mut_uart, 0xFFFF);
+		printf("Starting to free block %d\n", i);
+		os_mut_release(g_mut_uart);	
+		
+		os_mem_free(&mpool, buffer[i]);
 	}
-  
+	
+	os_mut_wait(g_mut_uart, 0xFFFF);
+	printf("Freed all memory\n");
+	os_mut_release(g_mut_uart);	
+	
+	
+//	//Display tasks
+//	g_tid = os_tsk_create(task1, 1);  /* task 2 at priority 1 */
+//	os_mut_wait(g_mut_uart, 0xFFFF);
+//	printf("init: created task1 with TID %d\n", g_tid);
+//	os_mut_release(g_mut_uart);
+	
 	os_tsk_delete_self();     /* task MUST delete itself before exiting */
 }
-
 
 /**
  * @brief: convert state numerical value to string represenation      
