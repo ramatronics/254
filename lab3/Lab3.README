@@ -1,0 +1,6 @@
+1) Open the project 'lab3_keil_proc.uvmpw' in Keil.
+2) Rebuild All
+3) Run
+
+Test description is in ./RTX_APP folder			"lab3_test_spec.txt"
+Answers to questions are in ./RTX_APP folder	"lab3_QA.txt"

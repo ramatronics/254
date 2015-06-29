@@ -46,7 +46,7 @@ int rt_tsk_count_get (void) {
 OS_RESULT rt_tsk_get (OS_TID task_id, RL_TASK_INFO *p_task_info) {	
 	P_TCB t;
 	U32 sSize, sAddrEnd, sAddrCurr;
-	U32 *sStart, *sEnd;
+	U32 *sEnd;
 	
 	if((task_id < 1 || task_id > os_maxtaskrun) && task_id != 0xFF)
 		return OS_R_NOK;
@@ -68,7 +68,6 @@ OS_RESULT rt_tsk_get (OS_TID task_id, RL_TASK_INFO *p_task_info) {
 	if(sSize == 0)
 		sSize = (U16)os_stackinfo >> 2;
 	
-	sStart = &t->stack[0];
 	sEnd = &t->stack[sSize];
 	
 	sAddrEnd = (U32)sEnd;

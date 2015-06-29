@@ -1,0 +1,53 @@
+Lab 3 Questions
+
+1)
+
+p_lnk  is a link pointer for ready/sem, wait list
+
+ret_val is the return value upon completion of a wait
+
+the stack variable is a pointer to the task stack memory block, tsk_stack  is the current task stack pointer
+
+Yes it will, because the p_lnk  field is in both structures and they point to the same thing. Therefore casting a XCB to a TCB has no affect on  p_lnk
+
+2) mp_tcb is a  data structure of memory pool tab location. mp_stk  is the same thing only for memory pool stack allocation
+
+3)
+ 
+The General Purpose registers R0 - R12 and the LR register are all saved to the task stack
+
+start address: p_tcb -> stack[0]
+end address: p_tch ->stack[size]  where size is the total size of the stack
+
+calling p_tcb -> tsk_stack  will return the current a non RUNNING task
+
+calling rt_get_PSP()  will return the current task pointer of  a RUNNING task
+
+4)
+
+To declare a memory pool:  _declare_box(mypool, 12, 20);
+
+To initialize a memory pool: _initialize_box(mypool, sizeof(mypool), 12);
+
+The corresponding kernel function of _alloc_box is rt_alloc_box(void *box_mem);
+
+The corresponding kernel function of _free_box() is rt_free_box (void *box_mem); 
+
+
+5)
+
+rt_put_prio()  places a p_task into a ordered list based on its priority
+
+rt_get_first()  gets the task at the head of the ordered list, therefore the one with the highest priority
+
+6)
+
+rt_block()  Block running task and choose next ready task
+
+rt_dispatch() Dispatch next task if any identified or dispatch highest ready task 
+
+7)
+
+There is no code to reset there return value of OS_R_MBX  because it would block the os_mbx_wait function
+
+8) They are both linked lists

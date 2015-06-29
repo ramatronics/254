@@ -44,14 +44,14 @@ struct OS_XCB blocking_list;
  */
 void *rt_alloc_box_s (void *p_mpool) {
 	void* ptr = rt_alloc_box(p_mpool);
+	P_TCB t;
+	int tId;
 	
 	if(ptr == NULL){		
-		if(blocking_list.p_lnk == NULL){
-			blocking_list.p_lnk = os_tsk.run;
-		}else{
-			rt_put_prio(&blocking_list, os_tsk.run);
-		}
+		tId = rt_tsk_self();
+		t = os_active_TCB[tId - 1];
 		
+		rt_put_prio(&blocking_list, t);		
 		rt_block(0xffff, 10);
 	}
 	
@@ -68,23 +68,20 @@ void *rt_alloc_box_s (void *p_mpool) {
 OS_RESULT rt_free_box_s (void *p_mpool, void *box) {
 	P_TCB t;
 	
-	if (box < p_mpool || box >= ((P_BM) p_mpool)->end) {
-    return OS_R_NOK;
-  }
-	
 	if(rt_free_box(p_mpool, box)){
 		return OS_R_NOK;
-	}
-	
-	if(blocking_list.p_lnk != NULL){		
-		t = rt_get_first(&blocking_list);		
-		
-		if(t != NULL){
-			t->ret_val = (U32)box;	
-			t->state = READY;
-			rt_dispatch(t);		
+	}else{	
+		if(blocking_list.p_lnk != NULL){		
+			t = rt_get_first(&blocking_list);		
+			
+			if(t != NULL){
+				t->ret_val = (U32)box;	
+				t->state = READY;
+				rt_dispatch(t);	
+				return OS_R_OK;				
+			}
 		}
 	}
 	
-	return OS_R_OK;
+	return OS_R_NOK;
 }
