@@ -411,7 +411,7 @@ Removing Unused input sections from the image.
     Removing uart_polling.o(.revsh_text), (4 bytes).
     Removing lab3_main.o(.rev16_text), (4 bytes).
     Removing lab3_main.o(.revsh_text), (4 bytes).
-    Removing lab3_main.o(.constdata), (20 bytes).
+    Removing lab3_main.o(.constdata), (16 bytes).
     Removing rt_task.o(i.rt_tsk_pass), (44 bytes).
     Removing rt_task.o(i.rt_tsk_prio), (156 bytes).
     Removing rt_time.o(i.rt_itv_set), (28 bytes).
@@ -445,7 +445,7 @@ Removing Unused input sections from the image.
     Removing rt_timer.o(i.rt_tmr_create), (100 bytes).
     Removing rt_timer.o(i.rt_tmr_kill), (60 bytes).
 
-39 unused section(s) (total 2370 bytes) removed from the image.
+39 unused section(s) (total 2366 bytes) removed from the image.
 
 ==============================================================================
 
@@ -667,10 +667,10 @@ Image Symbol Table
     i.rt_tsk_create                          0x00001f3c   Section        0  rt_task.o(i.rt_tsk_create)
     i.rt_tsk_delete                          0x00001fb8   Section        0  rt_task.o(i.rt_tsk_delete)
     i.rt_tsk_get                             0x0000209c   Section        0  rt_task_ext.o(i.rt_tsk_get)
-    i.rt_tsk_self                            0x00002144   Section        0  rt_task.o(i.rt_tsk_self)
-    .constdata                               0x0000215c   Section       40  rtx_conf_cm.o(.constdata)
+    i.rt_tsk_self                            0x00002140   Section        0  rt_task.o(i.rt_tsk_self)
+    .constdata                               0x00002158   Section       40  rtx_conf_cm.o(.constdata)
+    __tagsym$$used                           0x0000216c   Number         0  rtx_conf_cm.o(.constdata)
     __tagsym$$used                           0x00002170   Number         0  rtx_conf_cm.o(.constdata)
-    __tagsym$$used                           0x00002174   Number         0  rtx_conf_cm.o(.constdata)
     .data                                    0x10000000   Section        8  rtx_conf_cm.o(.data)
     nr_mutex                                 0x10000004   Data           4  rtx_conf_cm.o(.data)
     .data                                    0x10000008   Section        8  retarget.o(.data)
@@ -929,21 +929,21 @@ Image Symbol Table
     rt_tmr_tick                              0x00001ef1   Thumb Code    66  rt_timer.o(i.rt_tmr_tick)
     rt_tsk_create                            0x00001f3d   Thumb Code   106  rt_task.o(i.rt_tsk_create)
     rt_tsk_delete                            0x00001fb9   Thumb Code   202  rt_task.o(i.rt_tsk_delete)
-    rt_tsk_get                               0x0000209d   Thumb Code   150  rt_task_ext.o(i.rt_tsk_get)
-    rt_tsk_self                              0x00002145   Thumb Code    18  rt_task.o(i.rt_tsk_self)
-    os_maxtaskrun                            0x0000215c   Data           2  rtx_conf_cm.o(.constdata)
-    os_stackinfo                             0x00002160   Data           4  rtx_conf_cm.o(.constdata)
-    os_rrobin                                0x00002164   Data           4  rtx_conf_cm.o(.constdata)
-    os_trv                                   0x00002168   Data           4  rtx_conf_cm.o(.constdata)
-    os_flags                                 0x0000216c   Data           1  rtx_conf_cm.o(.constdata)
-    os_clockrate                             0x00002170   Data           4  rtx_conf_cm.o(.constdata)
-    os_timernum                              0x00002174   Data           4  rtx_conf_cm.o(.constdata)
-    mp_tcb_size                              0x00002178   Data           2  rtx_conf_cm.o(.constdata)
-    mp_stk_size                              0x0000217c   Data           4  rtx_conf_cm.o(.constdata)
-    os_fifo_size                             0x00002180   Data           1  rtx_conf_cm.o(.constdata)
-    mp_tmr_size                              0x00002182   Data           2  rtx_conf_cm.o(.constdata)
-    Region$$Table$$Base                      0x00002184   Number         0  anon$$obj.o(Region$$Table)
-    Region$$Table$$Limit                     0x000021a4   Number         0  anon$$obj.o(Region$$Table)
+    rt_tsk_get                               0x0000209d   Thumb Code   148  rt_task_ext.o(i.rt_tsk_get)
+    rt_tsk_self                              0x00002141   Thumb Code    18  rt_task.o(i.rt_tsk_self)
+    os_maxtaskrun                            0x00002158   Data           2  rtx_conf_cm.o(.constdata)
+    os_stackinfo                             0x0000215c   Data           4  rtx_conf_cm.o(.constdata)
+    os_rrobin                                0x00002160   Data           4  rtx_conf_cm.o(.constdata)
+    os_trv                                   0x00002164   Data           4  rtx_conf_cm.o(.constdata)
+    os_flags                                 0x00002168   Data           1  rtx_conf_cm.o(.constdata)
+    os_clockrate                             0x0000216c   Data           4  rtx_conf_cm.o(.constdata)
+    os_timernum                              0x00002170   Data           4  rtx_conf_cm.o(.constdata)
+    mp_tcb_size                              0x00002174   Data           2  rtx_conf_cm.o(.constdata)
+    mp_stk_size                              0x00002178   Data           4  rtx_conf_cm.o(.constdata)
+    os_fifo_size                             0x0000217c   Data           1  rtx_conf_cm.o(.constdata)
+    mp_tmr_size                              0x0000217e   Data           2  rtx_conf_cm.o(.constdata)
+    Region$$Table$$Base                      0x00002180   Number         0  anon$$obj.o(Region$$Table)
+    Region$$Table$$Limit                     0x000021a0   Number         0  anon$$obj.o(Region$$Table)
     m_tmr                                    0x10000000   Data           4  rtx_conf_cm.o(.data)
     __stdout                                 0x10000008   Data           4  retarget.o(.data)
     __stdin                                  0x1000000c   Data           4  retarget.o(.data)
@@ -980,9 +980,9 @@ Memory Map of the image
 
   Image Entry point : 0x000000cd
 
-  Load Region LR_IROM1 (Base: 0x00000000, Size: 0x00002274, Max: 0x00080000, ABSOLUTE)
+  Load Region LR_IROM1 (Base: 0x00000000, Size: 0x00002270, Max: 0x00080000, ABSOLUTE)
 
-    Execution Region ER_IROM1 (Base: 0x00000000, Size: 0x000021a4, Max: 0x00080000, ABSOLUTE)
+    Execution Region ER_IROM1 (Base: 0x00000000, Size: 0x000021a0, Max: 0x00080000, ABSOLUTE)
 
     Base Addr    Size         Type   Attr      Idx    E Section Name        Object
 
@@ -1107,10 +1107,10 @@ Memory Map of the image
     0x00001ef0   0x0000004c   Code   RO          760    i.rt_tmr_tick       RTX_CM3.lib(rt_timer.o)
     0x00001f3c   0x0000007c   Code   RO          170    i.rt_tsk_create     RTX_CM3.lib(rt_task.o)
     0x00001fb8   0x000000e4   Code   RO          171    i.rt_tsk_delete     RTX_CM3.lib(rt_task.o)
-    0x0000209c   0x000000a8   Code   RO          364    i.rt_tsk_get        RTX_CM3.lib(rt_task_ext.o)
-    0x00002144   0x00000018   Code   RO          174    i.rt_tsk_self       RTX_CM3.lib(rt_task.o)
-    0x0000215c   0x00000028   Data   RO           15    .constdata          rtx_conf_cm.o
-    0x00002184   0x00000020   Data   RO          983    Region$$Table       anon$$obj.o
+    0x0000209c   0x000000a4   Code   RO          364    i.rt_tsk_get        RTX_CM3.lib(rt_task_ext.o)
+    0x00002140   0x00000018   Code   RO          174    i.rt_tsk_self       RTX_CM3.lib(rt_task.o)
+    0x00002158   0x00000028   Data   RO           15    .constdata          rtx_conf_cm.o
+    0x00002180   0x00000020   Data   RO          983    Region$$Table       anon$$obj.o
 
 
     Execution Region RW_IRAM1 (Base: 0x10000000, Size: 0x00002108, Max: 0x00008000, ABSOLUTE)
@@ -1147,7 +1147,7 @@ Image component sizes
 
       Code (inc. data)   RO Data    RW Data    ZI Data      Debug   Object Name
 
-      2456       1140          0        148        140      12102   lab3_main.o
+      2456       1140          0        148        140      12076   lab3_main.o
         86          0          0          8          0       5802   retarget.o
        148         26         40          8       7372      11049   rtx_conf_cm.o
         56         22        204          0        512        916   startup_lpc17xx.o
@@ -1155,7 +1155,7 @@ Image component sizes
        216         12          0          0          0       1708   uart_polling.o
 
     ----------------------------------------------------------------------
-      3504       1264        276        168       8028      48900   Object Totals
+      3504       1264        276        168       8028      48874   Object Totals
          0          0         32          0          0          0   (incl. Generated)
          2          0          0          0          4          0   (incl. Padding)
 
@@ -1174,7 +1174,7 @@ Image component sizes
         52          4          0          0          0        493   rt_semaphore.o
        330         42          0          7          0       3102   rt_system.o
       1060        166          0          8         52       7196   rt_task.o
-       168         18          0          0          0       1569   rt_task_ext.o
+       164         16          0          0          0       1537   rt_task_ext.o
         14          0          0          4          0        596   rt_time.o
         76         10          0          8          0        635   rt_timer.o
          4          4          0          0          0        156   svc_table.o
@@ -1211,18 +1211,18 @@ Image component sizes
          2          0          0          0          0         68   use_no_semi.o
 
     ----------------------------------------------------------------------
-      4832        444          0         40        220      29161   Library Totals
+      4828        442          0         40        220      29129   Library Totals
         18          0          0          4          0          0   (incl. Padding)
 
     ----------------------------------------------------------------------
 
       Code (inc. data)   RO Data    RW Data    ZI Data      Debug   Library Name
 
-      3830        400          0         36        124      27861   RTX_CM3.lib
+      3826        398          0         36        124      27829   RTX_CM3.lib
        984         44          0          0         96       1300   c_w.l
 
     ----------------------------------------------------------------------
-      4832        444          0         40        220      29161   Library Totals
+      4828        442          0         40        220      29129   Library Totals
 
     ----------------------------------------------------------------------
 
@@ -1231,15 +1231,15 @@ Image component sizes
 
       Code (inc. data)   RO Data    RW Data    ZI Data      Debug   
 
-      8336       1708        276        208       8248      74785   Grand Totals
-      8336       1708        276        208       8248      74785   ELF Image Totals
-      8336       1708        276        208          0          0   ROM Totals
+      8332       1706        276        208       8248      74727   Grand Totals
+      8332       1706        276        208       8248      74727   ELF Image Totals
+      8332       1706        276        208          0          0   ROM Totals
 
 ==============================================================================
 
-    Total RO  Size (Code + RO Data)                 8612 (   8.41kB)
+    Total RO  Size (Code + RO Data)                 8608 (   8.41kB)
     Total RW  Size (RW Data + ZI Data)              8456 (   8.26kB)
-    Total ROM Size (Code + RO Data + RW Data)       8820 (   8.61kB)
+    Total ROM Size (Code + RO Data + RW Data)       8816 (   8.61kB)
 
 ==============================================================================
 

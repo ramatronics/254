@@ -71,7 +71,7 @@ OS_RESULT rt_tsk_get (OS_TID task_id, RL_TASK_INFO *p_task_info) {
 	sStart = &t->stack[0];
 	sEnd = &t->stack[sSize];
 	
-	sAddrEnd = (U32)sEnd;	
+	sAddrEnd = (U32)sEnd;
 	sAddrCurr = t->state == RUNNING ? rt_get_PSP() : (U32)t->tsk_stack;
 	
 	p_task_info->stack_usage = (U32)((sAddrEnd - sAddrCurr)*100/(U16)os_stackinfo);

@@ -15,7 +15,6 @@
 #define NUM_FNAMES 7
 
 const U32 bSize = 8;
-const U32 nSize = 4;
 const U32 pSize = sizeof(U64);
 const U32 pCount = 10;
 const U32 tWait = 1;
@@ -225,13 +224,13 @@ __task void task4(void)
 __task void task5(void)
 {
 	int i;
-	void* t5b[nSize];
+	void* t5b[bSize];
 	
 	//os_mut_wait(g_mut_uart, 0xFFFF);
 	printf("Allocating memory: Task 5\n");
 	//os_mut_release(g_mut_uart);
 	
-	for (i = 0; i < nSize; i++) {
+	for (i = 0; i < bSize; i++) {
 		t5b[i] = os_mem_alloc(&mpool);
 	}
 	
@@ -245,7 +244,7 @@ __task void task5(void)
 	printf("Releasing memory: Task5\n");
 	//os_mut_release(g_mut_uart);
 	
-	for (i = 0; i < nSize; i++) {		
+	for (i = 0; i < bSize; i++) {		
 		os_mem_free(&mpool, t5b[i]);
 	}
 	
