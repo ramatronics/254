@@ -1,13 +1,9 @@
-CC=gcc
-CFLAGS=-Wall -g
-LD=gcc
-LDFLAGS=-g -lrt
+all: producer
 
 
-OBJS1=producer.o 
-OBJS2=consumer.o 
+producer: consumer
+	gcc -o producer producer.c -lrt
 
-all: producer.out consumer.out
+consumer: 
+	gcc -o consume consumer.c -lrt
 
-consumer.out: $(OBJS1)
-	$(LD) $(LDFLAGS) -o 

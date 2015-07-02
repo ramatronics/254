@@ -22,7 +22,7 @@ int spawn (char* program, char** arg_list, mqd_t qdes) {
 		// ./consume is the compiled file of consumer.c
 		execvp ("./consume", arg_list);
 
-		fprintf(stderr, "and error occurred in exec\n" );
+		fprintf(stderr, "an error occurred in exec\n" );
 		abort ();
 	}
 }
