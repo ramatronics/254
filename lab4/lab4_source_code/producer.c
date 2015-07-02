@@ -29,7 +29,7 @@ int spawn (char* program, char** arg_list, mqd_t qdes) {
 
 double time_in_seconds(){
 	struct timeval tv;
-	double t1
+	double t1;
 
 	gettimeofday(&tv, NULL);
 	t1 = tv.tv_sec + tv.tv_usec/1000000.0;
@@ -82,7 +82,7 @@ int main(int argc, char *argv[]) {
 	/* forking a child proccess to be consumer */
 
 	double starting_time;
-	spawn("consumer", argv, qdes)
+	spawn("consumer", argv, qdes);
 	double time_at_first_int = time_in_seconds();
 
 	/* sending random numbers from the producer into the message queue */
