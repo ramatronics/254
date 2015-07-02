@@ -20,7 +20,7 @@ int main(int argc, char *argv[]) {
 	mode_t mode = S_IRUSR | S_IWUSR;
 	struct mq_attr attr;
 
-	attr.mq_maxmsg  = queue_size
+	attr.mq_maxmsg  = queue_size;
 	attr.mq_msgsize = sizeof(int);
 	attr.mq_flags   = 0;	/* a blocking queue  */
 
