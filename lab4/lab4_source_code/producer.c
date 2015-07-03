@@ -96,7 +96,7 @@ int main(int argc, char *argv[]) {
 	srand(time(0));
 
 	for(i = 0; i < number_of_messages; i++ ){
-		random_number  = rand() % 20;
+		random_number  = rand() % 100;
 
 
 		if(mq_send(qdes, (char*)&random_number, sizeof(int), message_priority) == -1){
