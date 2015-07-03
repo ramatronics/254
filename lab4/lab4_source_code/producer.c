@@ -84,7 +84,7 @@ int main(int argc, char *argv[]) {
 
 	/* forking a child proccess to be consumer */
 
-	double starting_time;
+	double starting_time = time_in_seconds();
 	spawn("consumer", argv, qdes);
 	double time_at_first_int = time_in_seconds();
 
