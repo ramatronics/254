@@ -112,7 +112,7 @@ int main(int argc, char *argv[]) {
 	if(WIFEXITED(child_status)) {
 		double ending_time = time_in_seconds();
 		double time_to_initialize = time_at_first_int - starting_time ;
-		double time_to_consume = time_at_first_int - ending_time;
+		double time_to_consume = ending_time - time_at_first_int;
 
 
 		printf("Time to initialize system: %f\n", time_to_initialize );
