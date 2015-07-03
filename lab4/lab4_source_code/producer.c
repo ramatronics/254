@@ -103,7 +103,24 @@ int main(int argc, char *argv[]) {
 
 	/* ensure that the consumer has consumed all the ints */
 	
-	//TODO: how do I make the producer wait for the consumer?
+	int child_status;
+	wait(&child_status);
+
+	if(WIFEXITED(child_status)) {
+		double ending_time = time_in_seconds();
+		double time_to_initialize = time_at_first_int - starting_time ;
+		double time_to_consume = time_at_first_int - ending_time;
+
+
+		printf("Time to initialize system: %f\n", time_to_initialize );
+		printf("Time to transmit data: %f\n", time_to_consume);
+
+	} else {
+		printf("There has been an error in the child process");
+		exit(1);
+	}
+
+
 
 	/* closing and unlinking the message queue */
 
