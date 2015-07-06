@@ -85,7 +85,7 @@ int main(int argc, char *argv[]) {
 	/* forking a child proccess to be consumer */
 
 	double starting_time = time_in_seconds();
-	spawn("consumer", argv, qdes);
+	pid_t child_pid = spawn("consumer", argv, qdes);
 	double time_at_first_int = time_in_seconds();
 
 	/* sending random numbers from the producer into the message queue */
@@ -106,10 +106,10 @@ int main(int argc, char *argv[]) {
 
 	/* ensure that the consumer has consumed all the ints */
 	
-	int child_status;
-	wait(&child_status);
+	int return_status;
+	waitpid(child_pid, &return_status, 0)
 
-	if(WIFEXITED(child_status)) {
+	if(return_status == 0) {
 		double ending_time = time_in_seconds();
 		double time_to_initialize = time_at_first_int - starting_time ;
 		double time_to_consume = ending_time - time_at_first_int;
