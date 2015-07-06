@@ -107,7 +107,7 @@ int main(int argc, char *argv[]) {
 	/* ensure that the consumer has consumed all the ints */
 	
 	int return_status;
-	waitpid(child_pid, &return_status, 0)
+	waitpid(child_pid, &return_status, 0);
 
 	if(return_status == 0) {
 		double ending_time = time_in_seconds();
