@@ -76,6 +76,7 @@ int main(int argc, char *argv[]) {
 
 	char *qname = "/mailbox_lab4";
 
+	//open the queue
 	qdes  = mq_open(qname, O_RDWR | O_CREAT, mode, &attr);
 	if (qdes == -1 ) {
 		perror("mq_open() failed");
@@ -98,7 +99,7 @@ int main(int argc, char *argv[]) {
 	for(i = 0; i < number_of_messages; i++ ){
 		random_number  = rand() % 100;
 
-
+		//send message to the queue
 		if(mq_send(qdes, (char*)&random_number, sizeof(int), message_priority) == -1){
 			perror("mq_send() failed");
 		}

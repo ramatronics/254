@@ -26,6 +26,7 @@ int main(int argc, char *argv[]) {
 
 	char *qname = "/mailbox_lab4";
 
+	//open the queue
 	qdes  = mq_open(qname, O_RDONLY, mode, &attr);
 	if (qdes == -1 ) {
 		perror("mq_open()");
@@ -40,6 +41,7 @@ int main(int argc, char *argv[]) {
 	for(i = 0; i < number_of_messages; i++){
 		int recieved_message;
 
+		//receive message from the queue
 		if (mq_receive(qdes, (char *)&recieved_message, sizeof(int), message_priority) == -1){
 			printf("mq_receive() failed\n");
 			return 1;
