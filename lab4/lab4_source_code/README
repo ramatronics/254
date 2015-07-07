@@ -1,0 +1,22 @@
+Lab 4
+
+Sadman Khan
+Ramie Raufdeen
+
+
+To properly build this lab, simply run the 'make' command on the terminal
+This should produce a executable file with the names 
+  -> produce
+  -> consume
+
+If that fails, run the following commands in order
+
+$ gcc -o produce producer.c -lrt
+$ gcc -o consume consumer.c -ltr
+
+To run the program
+
+$ ./produce <N> <B>
+
+where N is the number of messages that the producer should produce and 
+B is the buffer size of the message queue
