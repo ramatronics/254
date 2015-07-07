@@ -49,6 +49,8 @@ int main(int argc, char *argv[]) {
 
 	}
 
+	/* closing the message queue on the consumer side */
+
 	if (mq_close(qdes) == -1) {
 		perror("mq_close() failed");
 		exit(2);
