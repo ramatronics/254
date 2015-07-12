@@ -32,16 +32,45 @@ void init_message_queue(){
 }
 
 
+void enqueue(int data){
+	if(message_queue == NULL){
+		message_queue = malloc(sizeof(struct queue));
+		message_queue->value = data;
+		message_queue->next = NULL;
+	} else {
+		struct queue* new_message = malloc(sizeof(struct queue));
+		new_message->next = message_queue;
+		new_message->value = data;
+	    message_queue = new_message;
+	}
+}
+
+void dequeue(int c_id){
+	struct queue* next_message;
+
+	next_message = message_queue;
+	message_queue= message_queue->next;
+
+	int value = next_message->value;
+	int sqrt_val = sqrt(value);
+
+	printf("%i %i %i\n", c_id, value, sqrt_val);
+
+	// if (value == (sqrt_val * sqrt_val)){
+	// 	printf("%i %i %i\n", c_id, value, sqrt_val);
+	// }
+
+}
+
+
 //processs thread untill empty
 
-void* dequeue_message(){
-	int c_id = (int) (void*) (pthread_self());
+void* dequeue_message(void* arg){
+	int c_id = *((int *)arg);	
 	while(1){
 		
+		printf("%d\n",c_id );
 
-		if(sem_trywait(&consumed_messages_count)){
-			break;
-		}
 
 		sem_wait(&message_count);
 
@@ -54,25 +83,22 @@ void* dequeue_message(){
 
 		
 	}
+	return NULL;
 }
 
 //enqueue into the message queue
 
-void* enqueue_message (){
-	int p_id = (int) (void*) (pthread_self());
-
+void* enqueue_message (void* arg){
+	int p_id = *((int *)arg);
 	int i;
-	for(i = p_id; p_id < message_count; i+= producer_count){
-		struct queue* new_message;
-
-	    
-
+	for(i = p_id; i < total_number_of_messages; i += producer_count){
 	    pthread_mutex_lock (&message_queue_mutex);
 
 	    //adding a new job to the head of the linked list
+	    
 	    sem_wait(&messages_in_queue);
 	    
-	    enqueue(p_id);
+	    enqueue(i);
 
 	    // let other threads know that there are jobs in the queue 
 	    // one of the threads that was blocked, now has the ability to consume the job;
@@ -83,12 +109,13 @@ void* enqueue_message (){
 
 	    pthread_mutex_unlock(&message_queue_mutex);
 
-	};
+	}
+	return NULL;
     
 }
 
 int main(int argc, char *argv[0]){
-	if (argc < 4){
+	if (argc < 5){
 		printf("Invalid number of inputs\n");
 		exit(0);
 	}
@@ -112,14 +139,19 @@ int main(int argc, char *argv[0]){
 	pthread_t producer_thread_id[producer_count];
 	pthread_t consumer_thread_id[consumer_count];
 
+	int c_ids[consumer_count];
+	int p_ids[producer_count];
+
 	//create the producer and consumer threads
 	int i;
 	for(i = 0; i < producer_count; i++){
-		pthread_create(&(producer_thread_id[i]), NULL, &enqueue_message, NULL);
+		p_ids[i] = i;
+		pthread_create(&(producer_thread_id[i]), NULL, &enqueue_message, (void*)&(p_ids[i]));
 	}
 
 	for(i=0; i < consumer_count; i++){
-		pthread_create(&(consumer_thread_id[i]), NULL, &dequeue_message, NULL);
+		c_ids[i] = i;
+		pthread_create(&(consumer_thread_id[i]), NULL, &dequeue_message, (void*)&(c_ids[i]));
 	}
 
 
@@ -134,32 +166,9 @@ int main(int argc, char *argv[0]){
 		pthread_join(consumer_thread_id[i], NULL);
 	}
 
+	sem_destroy(&message_count);
+	sem_destroy(&consumed_messages_count);
+	sem_destroy(&messages_in_queue);
+
 	return 0;
-}
-
-void enqueue(int data){
-	if(message_queue == NULL){
-		new_message = malloc(sizof(queue));
-		new_message->value = data;
-		new_message->next = NULL;
-	} else {
-		struct queue* new_message = malloc(sizof(queue));
-		new_message->next = message_queue;
-		new_message->value = data;
-	    message_queue = new_message;
-	}
-}
-
-void dequeue(int c_id){
-	struct queue* next_message;
-
-	next_message = message_queue;
-	message_queue= message_queue->next;
-
-	int value = next_message->value;
-	int sqrt_val = sqrt(value);
-
-	if (value == (sqrt_val * sqrt_val)){
-		printf("%i %i %i\n", c_id, value, sqrt_val);
-	}
 }
