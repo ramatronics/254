@@ -12,11 +12,11 @@ struct queue {
 };
 
 struct queue* message_queue;
-pthread_mutex_t message_queue_mutex = PTHREAD_MUTEX_INITIALIZER;
 
 sem_t message_count; //makes sure that there is a message in the queue before the consumer tries to consume
 sem_t consumed_messages_count; //allow the consumer thread to exit once all the messages have been consumed
-sem_t messages_in_queue; //makes sure that there is enough space in the queue to handle one another enqueue 
+sem_t empty_space; //makes sure that there is enough space in the queue to handle one another enqueue 
+sem_t lock;
 
 int producer_count;
 int total_number_of_messages;
@@ -26,9 +26,10 @@ int message_queue_size;
 
 void init_message_queue(){
 	message_queue = NULL;
+	sem_init(&lock,0,1);
 	sem_init(&message_count, 0,0); 
 	sem_init(&consumed_messages_count,0,total_number_of_messages);
-	sem_init(&messages_in_queue, 0, message_queue_size);
+	sem_init(&empty_space, 0, message_queue_size);
 }
 
 
@@ -43,22 +44,43 @@ void enqueue(int data){
 		new_message->value = data;
 	    message_queue = new_message;
 	}
+
+	struct queue* head = message_queue;
+	printf("produce: ");
+	while(head != NULL){
+		printf("%d ->", head->value);
+		head = head->next;
+	}
+
+	printf("NULL \n");
+
 }
 
 void dequeue(int c_id){
+
+	struct queue* head = message_queue;
+	printf("consume: ");
+	while(head != NULL){
+		printf("%d ->", head->value);
+		head = head->next;
+	}
+	printf("NULL\n");
+
 	struct queue* next_message;
 
 	next_message = message_queue;
-	message_queue= message_queue->next;
+	message_queue = message_queue->next;
 
 	int value = next_message->value;
 	int sqrt_val = sqrt(value);
 
-	printf("%i %i %i\n", c_id, value, sqrt_val);
+	free(next_message);
 
-	// if (value == (sqrt_val * sqrt_val)){
-	// 	printf("%i %i %i\n", c_id, value, sqrt_val);
-	// }
+	
+
+	if (value == (sqrt_val * sqrt_val)){
+		printf("%i %i %i\n", c_id, value, sqrt_val);
+	}
 
 }
 
@@ -68,18 +90,24 @@ void dequeue(int c_id){
 void* dequeue_message(void* arg){
 	int c_id = *((int *)arg);	
 	while(1){
+
 		
-		printf("%d\n",c_id );
+		
+		if(sem_trywait(&consumed_messages_count)){
+			break;
+		}
+		
 
-
+		//wait for a message to be in the queue
 		sem_wait(&message_count);
 
-		// lock the message queue from enqueuing or dequeing
-		pthread_mutex_lock (&message_queue_mutex);
+		// lock the message queue 
+		sem_wait (&lock);
 		dequeue(c_id);
-		pthread_mutex_unlock(&message_queue_mutex);
+		sem_post(&lock);
 
-		sem_wait(&messages_in_queue);
+		//signal producers that there is one less message in the message queue
+		sem_post(&empty_space);
 
 		
 	}
@@ -92,27 +120,21 @@ void* enqueue_message (void* arg){
 	int p_id = *((int *)arg);
 	int i;
 	for(i = p_id; i < total_number_of_messages; i += producer_count){
-	    pthread_mutex_lock (&message_queue_mutex);
 
-	    //adding a new job to the head of the linked list
-	    
-	    sem_wait(&messages_in_queue);
-	    
+		sem_wait(&empty_space);
+
+	    sem_wait(&lock);
 	    enqueue(i);
+	    sem_post(&lock);
 
-	    // let other threads know that there are jobs in the queue 
-	    // one of the threads that was blocked, now has the ability to consume the job;
-	    sem_post(&message_count);
-	    sem_post(&messages_in_queue);
-
-
-
-	    pthread_mutex_unlock(&message_queue_mutex);
+	    // let consumers know that there is a message in the queue 
+	    sem_post(&message_count);  
 
 	}
 	return NULL;
     
 }
+
 
 int main(int argc, char *argv[0]){
 	if (argc < 5){
@@ -166,9 +188,12 @@ int main(int argc, char *argv[0]){
 		pthread_join(consumer_thread_id[i], NULL);
 	}
 
+	printf("%s\n",  "ending");
+
 	sem_destroy(&message_count);
 	sem_destroy(&consumed_messages_count);
-	sem_destroy(&messages_in_queue);
+	sem_destroy(&empty_space);
+	sem_destroy(&lock);
 
 	return 0;
 }
