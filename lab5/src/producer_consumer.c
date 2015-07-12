@@ -53,6 +53,8 @@ void dequeue(int c_id){
 
 	int value = next_message->value;
 	int sqrt_val = sqrt(value);
+	
+	// printf("%i %i %i\n", c_id, value, sqrt_val);
 	free(next_message);
 
 	if (value == (sqrt_val * sqrt_val)){
