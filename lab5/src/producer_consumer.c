@@ -69,7 +69,7 @@ void* dequeue_message(void* arg){
 	int c_id = *((int *)arg);	
 	while(1){
 		
-		printf("%d\n",c_id );
+		
 
 
 		sem_wait(&message_count);
