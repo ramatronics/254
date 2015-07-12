@@ -72,15 +72,15 @@ void dequeue(int c_id){
 	message_queue = message_queue->next;
 
 	int value = next_message->value;
-	int sqrt_val = sqrt(value);
 
+	printf("%i %i\n", c_id, value);
 	free(next_message);
 
 	
 
-	if (value == (sqrt_val * sqrt_val)){
-		printf("%i %i %i\n", c_id, value, sqrt_val);
-	}
+	// if (value == (sqrt_val * sqrt_val)){
+	// 	printf("%i %i %i\n", c_id, value, sqrt_val);
+	// }
 
 }
 
