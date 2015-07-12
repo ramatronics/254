@@ -12,11 +12,11 @@ struct queue {
 };
 
 struct queue* message_queue;
+pthread_mutex_t lock = PTHREAD_MUTEX_INITIALIZER;
 
 sem_t message_count; //makes sure that there is a message in the queue before the consumer tries to consume
 sem_t consumed_messages_count; //allow the consumer thread to exit once all the messages have been consumed
 sem_t empty_space; //makes sure that there is enough space in the queue to handle one another enqueue 
-sem_t lock;
 
 int producer_count;
 int total_number_of_messages;
@@ -26,7 +26,6 @@ int message_queue_size;
 
 void init_message_queue(){
 	message_queue = NULL;
-	sem_init(&lock,0,1);
 	sem_init(&message_count, 0,0); 
 	sem_init(&consumed_messages_count,0,total_number_of_messages);
 	sem_init(&empty_space, 0, message_queue_size);
@@ -71,21 +70,18 @@ void dequeue(int c_id){
 void* dequeue_message(void* arg){
 	int c_id = *((int *)arg);	
 	while(1){
-
-		
-		
+			
 		if(sem_trywait(&consumed_messages_count)){
 			break;
 		}
 		
-
 		//wait for a message to be in the queue
 		sem_wait(&message_count);
 
 		// lock the message queue 
-		sem_wait (&lock);
+		pthread_mutex_lock (&lock);
 		dequeue(c_id);
-		sem_post(&lock);
+		pthread_mutex_unlock(&lock);
 
 		//signal producers that there is one less message in the message queue
 		sem_post(&empty_space);
@@ -104,9 +100,9 @@ void* enqueue_message (void* arg){
 
 		sem_wait(&empty_space);
 
-	    sem_wait(&lock);
+	    pthread_mutex_lock(&lock);
 	    enqueue(i);
-	    sem_post(&lock);
+	    pthread_mutex_unlock(&lock);
 
 	    // let consumers know that there is a message in the queue 
 	    sem_post(&message_count);  
@@ -174,7 +170,6 @@ int main(int argc, char *argv[0]){
 	sem_destroy(&message_count);
 	sem_destroy(&consumed_messages_count);
 	sem_destroy(&empty_space);
-	sem_destroy(&lock);
 
 	return 0;
 }
