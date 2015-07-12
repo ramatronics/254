@@ -44,28 +44,9 @@ void enqueue(int data){
 		new_message->value = data;
 	    message_queue = new_message;
 	}
-
-	struct queue* head = message_queue;
-	printf("produce: ");
-	while(head != NULL){
-		printf("%d ->", head->value);
-		head = head->next;
-	}
-
-	printf("NULL \n");
-
 }
 
 void dequeue(int c_id){
-
-	struct queue* head = message_queue;
-	printf("consume: ");
-	while(head != NULL){
-		printf("%d ->", head->value);
-		head = head->next;
-	}
-	printf("NULL\n");
-
 	struct queue* next_message;
 
 	next_message = message_queue;
