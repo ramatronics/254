@@ -7,11 +7,12 @@
 #include <math.h>
 
 struct queue {
-	struct queue* next;
-	int value;
+	int *array;
+	int head;
+	int tail;
 };
 
-struct queue* message_queue;
+struct queue message_queue;
 pthread_mutex_t lock = PTHREAD_MUTEX_INITIALIZER;
 
 sem_t message_count; //makes sure that there is a message in the queue before the consumer tries to consume
@@ -25,7 +26,10 @@ int message_queue_size;
 // a one time init of the job queue
 
 void init_message_queue(){
-	message_queue = NULL;
+	message_queue.array = (int*) malloc (sizeof(int) * message_queue_size);
+	message_queue.tail = 0;
+	message_queue.head = 0;
+
 	sem_init(&message_count, 0,0); 
 	sem_init(&consumed_messages_count,0,total_number_of_messages);
 	sem_init(&empty_space, 0, message_queue_size);
@@ -33,33 +37,30 @@ void init_message_queue(){
 
 
 void enqueue(int data){
-	if(message_queue == NULL){
-		message_queue = malloc(sizeof(struct queue));
-		message_queue->value = data;
-		message_queue->next = NULL;
-	} else {
-		struct queue* new_message = malloc(sizeof(struct queue));
-		new_message->next = message_queue;
-		new_message->value = data;
-	    message_queue = new_message;
+	message_queue.tail++;
+	if (message_queue.tail == message_queue_size){
+		message_queue.tail = 0;
 	}
+
+	message_queue.array[message_queue.tail] = data;
 }
 
 void dequeue(int c_id){
-	struct queue* next_message;
-
-	next_message = message_queue;
-	message_queue = message_queue->next;
-
-	int value = next_message->value;
-	int sqrt_val = sqrt(value);
 	
-	// printf("%i %i %i\n", c_id, value, sqrt_val);
-	free(next_message);
-
-	if (value == (sqrt_val * sqrt_val)){
-		printf("%i %i %i\n", c_id, value, sqrt_val);
+	message_queue.head++;
+	if (message_queue.head == message_queue_size){
+		message_queue.head = 0;
 	}
+
+	int value = message_queue.array[message_queue.head];
+	//int sqrt_val = sqrt(value);
+	
+	printf("%i %i\n", c_id, value);
+	// free(next_message);
+
+	// if (value == (sqrt_val * sqrt_val)){
+	// 	printf("%i %i %i\n", c_id, value, sqrt_val);
+	// }
 
 }
 
