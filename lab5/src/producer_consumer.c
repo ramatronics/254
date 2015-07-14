@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <pthread.h>
 #include <semaphore.h>
-#include <time.h>
+#include <sys/time.h>
 #include <stdlib.h>
 #include <math.h>
 
@@ -17,7 +17,7 @@ pthread_mutex_t lock = PTHREAD_MUTEX_INITIALIZER;
 
 sem_t message_count; //makes sure that there is a message in the queue before the consumer tries to consume
 sem_t consumed_messages_count; //allow the consumer thread to exit once all the messages have been consumed
-sem_t empty_space; //makes sure that there is enough space in the queue to handle one another enqueue 
+sem_t empty_space; //makes sure that there is enough space in the queue to handle another enqueue 
 
 int producer_count;
 int total_number_of_messages;
@@ -33,6 +33,16 @@ void init_message_queue(){
 	sem_init(&message_count, 0,0); 
 	sem_init(&consumed_messages_count,0,total_number_of_messages);
 	sem_init(&empty_space, 0, message_queue_size);
+}
+
+double time_in_seconds(){
+    struct timeval tv;
+    double t1;
+
+    gettimeofday(&tv, NULL);
+    t1 = tv.tv_sec + tv.tv_usec/1000000.0;
+
+    return t1;
 }
 
 
@@ -56,9 +66,6 @@ void dequeue(int c_id){
 	value = message_queue.array[message_queue.head];
 	sqrt_val = sqrt(value);
 	
-	//printf("%i %i\n", c_id, value);
-	
-
 	if (value == (sqrt_val * sqrt_val)){
 		printf("%i %i %i\n", c_id, value, sqrt_val);
 	}
@@ -134,6 +141,10 @@ int main(int argc, char *argv[0]){
 
 	init_message_queue();
 
+	double starting_time;
+	double ending_time;
+	double total_time;
+
 	//create an array of producer and consumer thread ids
 
 	pthread_t producer_thread_id[producer_count];
@@ -141,6 +152,8 @@ int main(int argc, char *argv[0]){
 
 	int c_ids[consumer_count];
 	int p_ids[producer_count];
+
+	starting_time = time_in_seconds();
 
 	//create the producer and consumer threads
 	int i;
@@ -166,7 +179,10 @@ int main(int argc, char *argv[0]){
 		pthread_join(consumer_thread_id[i], NULL);
 	}
 
-	printf("%s\n",  "ending");
+	ending_time = time_in_seconds();
+	total_time = ending_time - starting_time;
+
+	printf("System execution time: %d seconds\n", total_time);
 
 	sem_destroy(&message_count);
 	sem_destroy(&consumed_messages_count);
