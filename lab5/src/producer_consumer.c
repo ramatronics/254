@@ -182,7 +182,7 @@ int main(int argc, char *argv[0]){
 	ending_time = time_in_seconds();
 	total_time = ending_time - starting_time;
 
-	printf("System execution time: %d seconds\n", total_time);
+	printf("System execution time: %f seconds\n", total_time);
 
 	sem_destroy(&message_count);
 	sem_destroy(&consumed_messages_count);
