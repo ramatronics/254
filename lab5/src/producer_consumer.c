@@ -46,21 +46,22 @@ void enqueue(int data){
 }
 
 void dequeue(int c_id){
+	int value, sqrt_val;
 	
 	message_queue.head++;
 	if (message_queue.head == message_queue_size){
 		message_queue.head = 0;
 	}
 
-	int value = message_queue.array[message_queue.head];
-	//int sqrt_val = sqrt(value);
+	value = message_queue.array[message_queue.head];
+	sqrt_val = sqrt(value);
 	
-	printf("%i %i\n", c_id, value);
-	// free(next_message);
+	//printf("%i %i\n", c_id, value);
+	
 
-	// if (value == (sqrt_val * sqrt_val)){
-	// 	printf("%i %i %i\n", c_id, value, sqrt_val);
-	// }
+	if (value == (sqrt_val * sqrt_val)){
+		printf("%i %i %i\n", c_id, value, sqrt_val);
+	}
 
 }
 
