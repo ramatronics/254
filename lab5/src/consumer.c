@@ -16,7 +16,7 @@ int main(int argc, char *argv[]) {
 
 	/* processing inputs */
 	int cid = atoi(argv[5]);
-	int consumer_count = atoi(argv[4])
+	int consumer_count = atoi(argv[4]);
 	int number_of_messages = atoi(argv[1]);
 	int queue_size = atoi(argv[2]);
 
