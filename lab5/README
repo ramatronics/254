@@ -1,0 +1,9 @@
+To compile the thread implemenation of the producer consumer probel
+    $ make thread
+
+To compile the process implementaion of the producer consumer problem
+    $ make process
+
+In both cases a produce executable file gets created
+to run:
+    $ ./produce <n> 
