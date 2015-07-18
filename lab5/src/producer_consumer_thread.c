@@ -110,7 +110,7 @@ int main(int argc, char *argv []){
 
 	ending_time = time_in_seconds();
 
-	execution_time = starting_time - ending_time;
+	execution_time = ending_time - starting_time;
 
 	printf("System Excution time: %f seconds\n", execution_time);
 

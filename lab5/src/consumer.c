@@ -20,7 +20,7 @@ int main(int argc, char *argv[]) {
 
 	/* opening the message queue for the consumer */
 	mqd_t qdes;
-	char *qname = "/mailbox_lab4";
+	char *qname = "/mailbox_lab4_extended";
 
 	//open the queue
 	qdes  = mq_open(qname, O_RDONLY);
