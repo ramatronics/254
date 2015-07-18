@@ -49,11 +49,6 @@ int main(int argc, char* argv[]){
 		exit(2);
 	}
 
-	if (mq_unlink(qname) != 0) {
-		perror("mq_unlink() failed");
-		exit(3);
-	}
-
 	return 0;
 
 }
