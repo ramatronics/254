@@ -38,7 +38,7 @@ int main(int argc, char* argv[]){
 	/* produce elements */
 
 	int i;
-	for(i = pid; i < total_message_number + consumer_count; i += producer_count){
+	for(i = pid; i < total_message_number; i += producer_count){
 		if(mq_send(qdes, (char*)&i, sizeof(int), 0) == -1){
 			perror("mq_send() failed");
 		}		
