@@ -28,7 +28,7 @@ int spawn (char* program, char** arg_list, mqd_t qdes, int pid){
 	/* need to cast the pid to a string to be passed into the process */
 	char pid_string[20];
 	sprintf(pid_string, "%d", pid);
-	arg_list[4] = pid_string;
+	arg_list[2] = pid_string;
 
 
 	pid_t child_pid;
