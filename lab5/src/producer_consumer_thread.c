@@ -90,11 +90,11 @@ int main(int argc, char *argv []){
 
 	int i;
 	for(i = 0; i < producer_count; i++){
-		spawn("/producer_p",argv, qdes, i);
+		spawn("./produce_p",argv, qdes, i);
 	}
 
 	for(i = 0; i < consumer_count; i++){
-		spawn("/consumer_p",argv, qdes, i);
+		spawn("./consume_p",argv, qdes, i);
 	}
 
 	finished_init_time = time_in_seconds();
