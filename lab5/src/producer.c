@@ -20,24 +20,15 @@ int main(int argc, char* argv[]){
 
 	
 	total_message_number = atoi(argv[1]);
-	buffer_size = atoi(argv[2]);
+	pid = atoi(argv[2]);
 	producer_count = atoi(argv[3]);
 	consumer_count = atoi(argv[4]);
-	pid = atoi(argv[5]);
-
-
+	
 	mqd_t qdes;
-	mode_t mode = S_IRUSR | S_IWUSR;
-	struct mq_attr attr;
-
-	attr.mq_maxmsg  = buffer_size;
-	attr.mq_msgsize = sizeof(int);
-	attr.mq_flags   = 0;
-
 	char *qname = "/mailbox_lab4_extended";
 
 	//open the queue
-	qdes = mq_open(qname,  O_RDWR,  mode, &attr);
+	qdes = mq_open(qname,  O_RDWR);
 	if(qdes == -1){
 		perror("mq_opne()");
 		exit(1);

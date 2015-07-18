@@ -28,7 +28,7 @@ int spawn (char* program, char** arg_list, mqd_t qdes, int pid){
 	/* need to cast the pid to a string to be passed into the process */
 	char pid_string[20];
 	sprintf(pid_string, "%d", pid);
-	arg_list[5] = pid_string;
+	arg_list[4] = pid_string;
 
 
 	pid_t child_pid;
@@ -88,20 +88,13 @@ int main(int argc, char *argv []){
 
 	starting_time = time_in_seconds();
 
-	char * processor_arg_list[6]; // build the arg list for the process
-
-	int i;
-	for(i = 0; i < 5; i++){
-		processor_arg_list[i] = argv[i];
-	}
-
 
 	for(i = 0; i < producer_count; i++){
-		spawn("/producer_p",processor_arg_list, qdes, i);
+		spawn("/producer_p",argv, qdes, i);
 	}
 
 	for(i = 0; i < consumer_count; i++){
-		spawn("/consumer_p",processor_arg_list, qdes, i);
+		spawn("/consumer_p",argv, qdes, i);
 	}
 
 	finished_init_time = time_in_seconds();
@@ -114,6 +107,8 @@ int main(int argc, char *argv []){
 	      break;
 	   }
 	}
+
+	ending_time = time_in_seconds();
 
 	execution_time = starting_time - ending_time;
 

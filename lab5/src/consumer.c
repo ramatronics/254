@@ -15,25 +15,14 @@
 int main(int argc, char *argv[]) {
 
 	/* processing inputs */
-	int cid = atoi(argv[5]);
-	int consumer_count = atoi(argv[4]);
-	int number_of_messages = atoi(argv[1]);
-	int queue_size = atoi(argv[2]);
+	int cid = atoi(argv[2]);
 
 	/* opening the message queue for the consumer */
-
 	mqd_t qdes;
-	mode_t mode = S_IRUSR | S_IWUSR;
-	struct mq_attr attr;
-
-	attr.mq_maxmsg  = queue_size;
-	attr.mq_msgsize = sizeof(int);
-	attr.mq_flags   = 0;	/* a blocking queue  */
-
 	char *qname = "/mailbox_lab4";
 
 	//open the queue
-	qdes  = mq_open(qname, O_RDONLY, mode, &attr);
+	qdes  = mq_open(qname, O_RDONLY);
 	if (qdes == -1 ) {
 		perror("mq_open()");
 		exit(1);
