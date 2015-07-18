@@ -75,9 +75,9 @@ int main(int argc, char *argv []){
 
 	attr.mq_maxmsg  = buffer_size;
 	attr.mq_msgsize = sizeof(int);
-	attr.mq_files   = 0;
+	attr.mq_flags   = 0;
 
-	char *qname = "/mailbox_lab4_extended"
+	char *qname = "/mailbox_lab4_extended";
 
 	//open the queue
 	qdes = mq_open(qname, O_RDWR | O_CREAT, mode, &attr);
@@ -91,7 +91,7 @@ int main(int argc, char *argv []){
 	char * processor_arg_list[6]; // build the arg list for the process
 
 	int i;
-	for(i = 0; i < 5; i++0{
+	for(i = 0; i < 5; i++0){
 		processor_arg_list[i] = argv[i];
 	}
 
