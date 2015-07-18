@@ -91,7 +91,7 @@ int main(int argc, char *argv []){
 	char * processor_arg_list[6]; // build the arg list for the process
 
 	int i;
-	for(i = 0; i < 5; i++0){
+	for(i = 0; i < 5; i++){
 		processor_arg_list[i] = argv[i];
 	}
 
@@ -108,6 +108,7 @@ int main(int argc, char *argv []){
 
 
 	//waiting for all the child process to finish before continuing
+	int pid;
 	while (pid = waitpid(-1, NULL, 0)) {
 	   if (errno == ECHILD) {
 	      break;
