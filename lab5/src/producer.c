@@ -23,11 +23,12 @@ int main(int argc, char* argv[]){
 	pid = atoi(argv[2]);
 	producer_count = atoi(argv[3]);
 	consumer_count = atoi(argv[4]);
-	
+
 	mqd_t qdes;
 	char *qname = "/mailbox_lab4_extended";
 
 	//open the queue
+	printf("pid: %d, opening the queue\n", pid );
 	qdes = mq_open(qname,  O_RDWR);
 	if(qdes == -1){
 		perror("mq_opne()");
