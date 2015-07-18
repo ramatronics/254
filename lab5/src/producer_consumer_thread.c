@@ -88,7 +88,7 @@ int main(int argc, char *argv []){
 
 	starting_time = time_in_seconds();
 
-
+	int i;
 	for(i = 0; i < producer_count; i++){
 		spawn("/producer_p",argv, qdes, i);
 	}
