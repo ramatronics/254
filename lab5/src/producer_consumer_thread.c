@@ -89,14 +89,16 @@ int main(int argc, char *argv []){
 	starting_time = time_in_seconds();
 
 	int i;
-	for(i = 0; i < producer_count; i++){
-		spawn("./produce_p",argv, qdes, i);
-	}
 
 	for(i = 0; i < consumer_count; i++){
 		spawn("./consume_p",argv, qdes, i);
 	}
 
+	for(i = 0; i < producer_count; i++){
+		spawn("./produce_p",argv, qdes, i);
+	}
+
+	
 	finished_init_time = time_in_seconds();
 
 
