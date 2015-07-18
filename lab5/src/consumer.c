@@ -47,7 +47,7 @@ int main(int argc, char *argv[]) {
 		if (recieved_message >= number_of_messages){
 			break;
 		} else {
-			printf("%d is consumed by %d", recieved_message, cid);
+			printf("%d is consumed by %d\n", recieved_message, cid);
 		}
 	}
 
