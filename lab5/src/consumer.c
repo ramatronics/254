@@ -34,8 +34,9 @@ int main(int argc, char *argv[]) {
 	/* consume elements */
 
 	int i;
+	int count = 0;
 	int message_priority = 0;
-	while(1){
+	for(i=0; i < 5; i++){
 		int recieved_message;
 
 		//receive message from the queue
@@ -44,13 +45,7 @@ int main(int argc, char *argv[]) {
 			return 1;
 		} 
 
-		//printf("%d is consumed by %d\n", recieved_message, cid);
-
-		if (recieved_message >= number_of_messages){
-			break;
-		} else {
-			printf("%d is consumed by %d\n", recieved_message, cid);
-		}
+		printf("%d is consumed by %d\n", recieved_message, cid);
 	}
 
 	/* closing the message queue on the consumer side */
