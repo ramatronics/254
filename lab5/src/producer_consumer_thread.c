@@ -86,6 +86,32 @@ int main(int argc, char *argv []){
 		exit(1);
 	}
 
+	//create a second single element queue containig the number of consumtion
+	struct mq_attr c_attr; //consumtion queue attr
+	mqd_t consumtion_queue;
+	mode_t mode_c = S_IRUSR | S_IWUSR;
+
+	c_attr.mq_maxmsg = 1;
+	c_attr.mq_msgsize = sizeof(int);
+	c_attr.mq_flags = 0;
+
+	char * consumtion_queue_name = "/consumtion_queue_mailbox";
+	
+
+	consumtion_queue = mq_open(consumtion_queue_name, O_RDWR | O_CREAT, mode_c, &c_attr);
+	if (consumtion_queue == -1){
+		perror("mq_open() for consumtion failed");
+		exit(1);
+	}
+
+
+	if(mq_send(consumtion_queue, (char *)&total_message_number, sizeof(int), 0) == -1){
+		perror("mq_send() for consumtion failed");
+	}
+
+
+	
+
 	starting_time = time_in_seconds();
 
 	int i;
@@ -124,8 +150,18 @@ int main(int argc, char *argv []){
 		exit(2);
 	}
 
+	if(mq_close(consumtion_queue) == -1){
+		perror("mq_close() for cmq failed from main");
+		exit(2);
+	}
+
 	if (mq_unlink(qname) != 0) {
 		perror("mq_unlink() failed");
+		exit(3);
+	}
+
+	if(mq_unlink(consumtion_queue_name) == -1){
+		perror("mq_unlink() failed for cmq from main");
 		exit(3);
 	}
 

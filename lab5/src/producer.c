@@ -28,7 +28,6 @@ int main(int argc, char* argv[]){
 	char *qname = "/mailbox_lab4_extended";
 
 	//open the queue
-	printf("pid: %d, opening the queue\n", pid );
 	qdes = mq_open(qname,  O_RDWR);
 	if(qdes == -1){
 		perror("mq_opne()");
