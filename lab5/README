@@ -6,4 +6,11 @@ To compile the process implementaion of the producer consumer problem
 
 In both cases a produce executable file gets created
 to run:
-    $ ./produce <n> 
+    $ ./produce <n> <b> <p> <c>
+
+n: the number of messages to be sent
+b: the size of the buffer
+p: the number of producers
+c: the number of consumers
+
+ 
