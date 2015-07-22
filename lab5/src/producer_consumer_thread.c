@@ -21,11 +21,17 @@ double time_in_seconds(){
 	return t1;
 }
 
+/* spawn a child process 
+   Both the producers and consumers are each their own process
+*/
+
 int spawn (char* program, char** arg_list, mqd_t qdes, int pid){
 	arg_list[0] = program;
 
 
-	/* need to cast the pid to a string to be passed into the process */
+	/* need to cast the pid to a string to be passed into the process 
+	   writing to arg_list[2] because the buffer count is not needed for the consumers or producers
+	*/
 	char pid_string[20];
 	sprintf(pid_string, "%d", pid);
 	arg_list[2] = pid_string;
@@ -33,6 +39,8 @@ int spawn (char* program, char** arg_list, mqd_t qdes, int pid){
 
 	pid_t child_pid;
 	child_pid = fork();
+
+	/* error check for child process */
 
 	if (child_pid != 0){
 		return child_pid;
@@ -44,6 +52,8 @@ int spawn (char* program, char** arg_list, mqd_t qdes, int pid){
 }
 
 int main(int argc, char *argv []){
+
+	/* process and ensure valid inputs */
 	if (argc < 5){
 		printf("%s\n", "Invalid number of inputs");
 		exit(0);
@@ -69,6 +79,8 @@ int main(int argc, char *argv []){
 	double ending_time;
 	double execution_time;
 
+	/* create and open the message queue */
+
 	struct mq_attr attr;
 	mqd_t qdes;
 	mode_t mode = S_IRUSR | S_IWUSR;
@@ -79,14 +91,16 @@ int main(int argc, char *argv []){
 
 	char *qname = "/mailbox_lab4_extended";
 
-	//open the queue
 	qdes = mq_open(qname, O_RDWR | O_CREAT, mode, &attr);
 	if(qdes == -1){
 		perror("mq_open() failed");
 		exit(1);
 	}
 
-	//create a second single element queue containig the number of consumtion
+	/* create and open a consumtion queue
+	   consumtion queue is a mq of size 1 which keeps track of the number of messages
+	   that have been consumed so far
+	*/
 	struct mq_attr c_attr; //consumtion queue attr
 	mqd_t consumtion_queue;
 	mode_t mode_c = S_IRUSR | S_IWUSR;
@@ -97,7 +111,6 @@ int main(int argc, char *argv []){
 
 	char * consumtion_queue_name = "/consumtion_queue_mailbox";
 	
-
 	consumtion_queue = mq_open(consumtion_queue_name, O_RDWR | O_CREAT, mode_c, &c_attr);
 	if (consumtion_queue == -1){
 		perror("mq_open() for consumtion failed");
@@ -105,6 +118,7 @@ int main(int argc, char *argv []){
 	}
 
 
+	/* we start by writing the value of `total_message_number` into the consumtion_queue */
 	if(mq_send(consumtion_queue, (char *)&total_message_number, sizeof(int), 0) == -1){
 		perror("mq_send() for consumtion failed");
 	}
@@ -113,6 +127,8 @@ int main(int argc, char *argv []){
 	
 
 	starting_time = time_in_seconds();
+
+	/* loop through and create the producers and consumers processes */
 
 	int i;
 
@@ -128,7 +144,7 @@ int main(int argc, char *argv []){
 	finished_init_time = time_in_seconds();
 
 
-	//waiting for all the child process to finish before continuing
+	/* waiting for all the chiild processes to finsih before continuing */
 	int pid;
 	while (pid = waitpid(-1, NULL, 0)) {
 	   if (errno == ECHILD) {
@@ -138,12 +154,14 @@ int main(int argc, char *argv []){
 
 	ending_time = time_in_seconds();
 
+	/* assumtion: execution time includes the time for initialization */
+
 	execution_time = ending_time - starting_time;
 
 	printf("System Excution time: %f seconds\n", execution_time);
 
 
-	/* closing and unlinking the message queue */
+	/* closing and unlinking the message queue and consumtion queue */
 
 	if (mq_close(qdes) == -1){
 		perror("mq_close() failed");

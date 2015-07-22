@@ -6,6 +6,12 @@
 #include <stdlib.h>
 #include <math.h>
 
+/* a queue struct implemented with a circular array 
+   it gets allocated as global variable and becomes shared memory 
+   that can be accessed by all threads
+*/
+
+
 struct queue {
 	int *array;
 	int head;
@@ -15,15 +21,15 @@ struct queue {
 struct queue message_queue;
 pthread_mutex_t lock = PTHREAD_MUTEX_INITIALIZER;
 
-sem_t message_count; //makes sure that there is a message in the queue before the consumer tries to consume
+sem_t message_count;           //makes sure that there is a message in the queue before the consumer tries to consume
 sem_t consumed_messages_count; //allow the consumer thread to exit once all the messages have been consumed
-sem_t empty_space; //makes sure that there is enough space in the queue to handle another enqueue 
+sem_t empty_space;             //makes sure that there is enough space in the queue to handle another enqueue 
 
 int producer_count;
 int total_number_of_messages;
 int message_queue_size;
 
-// a one time init of the job queue
+/* a one time init for the message queue and semaphores */
 
 void init_message_queue(){
 	message_queue.array = (int*) malloc (sizeof(int) * message_queue_size);
@@ -63,6 +69,8 @@ void dequeue(int c_id){
 		message_queue.head = 0;
 	}
 
+	/* printing the value if it is a perfect square */
+
 	value = message_queue.array[message_queue.head];
 	sqrt_val = sqrt(value);
 	
@@ -73,7 +81,9 @@ void dequeue(int c_id){
 }
 
 
-//processs thread untill empty
+/* consumer thread function
+   keep consuming from the message queue until the `consumed_messsages_count` hits 0
+*/
 
 void* dequeue_message(void* arg){
 	int c_id = *((int *)arg);	
@@ -99,13 +109,18 @@ void* dequeue_message(void* arg){
 	return NULL;
 }
 
-//enqueue into the message queue
+/* producer thread function
+   produces using the given algorithm from the manual
+
+   each producer produces a set number of ints
+*/
 
 void* enqueue_message (void* arg){
 	int p_id = *((int *)arg);
 	int i;
 	for(i = p_id; i < total_number_of_messages; i += producer_count){
 
+		// make sure that the number of ints in the message queue does not exceed the buffer size
 		sem_wait(&empty_space);
 
 	    pthread_mutex_lock(&lock);
@@ -145,7 +160,7 @@ int main(int argc, char *argv[0]){
 	double ending_time;
 	double total_time;
 
-	//create an array of producer and consumer thread ids
+	/* create an array of producer and consumer thread ids */
 
 	pthread_t producer_thread_id[producer_count];
 	pthread_t consumer_thread_id[consumer_count];
@@ -155,7 +170,8 @@ int main(int argc, char *argv[0]){
 
 	starting_time = time_in_seconds();
 
-	//create the producer and consumer threads
+	/* create the producer and consumer threads */
+
 	int i;
 	for(i = 0; i < producer_count; i++){
 		p_ids[i] = i;
@@ -168,8 +184,9 @@ int main(int argc, char *argv[0]){
 	}
 
 
-	// joing the producer and consumer threads to avoid exiting the main thread
-	// before the other threads have been completed
+	/* joing the producer and consumer threads to avoid exiting the main thread
+	   before the other threads have been completed
+	*/
 
 	for(i=0; i < producer_count; i++){
 		pthread_join(producer_thread_id[i], NULL);
@@ -183,6 +200,8 @@ int main(int argc, char *argv[0]){
 	total_time = ending_time - starting_time;
 
 	printf("System execution time: %f seconds\n", total_time);
+
+	/* destroying the semaphores */
 
 	sem_destroy(&message_count);
 	sem_destroy(&consumed_messages_count);
