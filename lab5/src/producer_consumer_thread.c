@@ -1,189 +1,210 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <mqueue.h>
-#include <sys/stat.h>
-#include <sys/types.h>
-#include <sys/wait.h>
-#include <unistd.h>
-#include <errno.h>
-#include <sys/time.h>
-#include <time.h>
-#include <string.h>
+/*
+    ECE 254- lab 5 
+    Note, The structure of this code is based on
+    advancedlinuxprogramming.com/alp-folder/alp-ch04-threads.pdf
+    listing 4.12
+    (Recomended reading from the pre lab)
 
-
-double time_in_seconds(){
-	struct timeval tv;
-	double t1;
-
-	gettimeofday(&tv, NULL);
-	t1 = tv.tv_sec + tv.tv_usec/1000000.0;
-
-	return t1;
-}
-
-/* spawn a child process 
-   Both the producers and consumers are each their own process
+    Sadman Khan 
+    Ramie Raufdeen
 */
 
-int spawn (char* program, char** arg_list, mqd_t qdes, int pid){
-	arg_list[0] = program;
 
 
-	/* need to cast the pid to a string to be passed into the process 
-	   writing to arg_list[2] because the buffer count is not needed for the consumers or producers
-	*/
-	char pid_string[20];
-	sprintf(pid_string, "%d", pid);
-	arg_list[2] = pid_string;
+#include <stdio.h>
+#include <stdlib.h>
+#include <pthread.h>
+#include <semaphore.h>
+#include <sys/time.h>
+#include <stdlib.h>
+#include <math.h>
+
+/* a queue struct implemented with a circular array 
+   it gets allocated as global variable and becomes shared memory 
+   that can be accessed by all threads
+*/
 
 
-	pid_t child_pid;
-	child_pid = fork();
+struct queue {
+	int *array;
+	int head;
+	int tail;
+};
 
-	/* error check for child process */
+struct queue message_queue;
+pthread_mutex_t lock = PTHREAD_MUTEX_INITIALIZER;
 
-	if (child_pid != 0){
-		return child_pid;
-	} else {
-		execvp(program, arg_list);
-		printf("%s\n", "an error has occurred in exec");
-		abort();
-	}
+sem_t message_count;           //makes sure that there is a message in the queue before the consumer tries to consume
+sem_t consumed_messages_count; //allow the consumer thread to exit once all the messages have been consumed
+sem_t empty_space;             //makes sure that there is enough space in the queue to handle another enqueue 
+
+int producer_count;
+int total_number_of_messages;
+int message_queue_size;
+
+/* a one time init for the message queue and semaphores */
+
+void init_message_queue(){
+	message_queue.array = (int*) malloc (sizeof(int) * message_queue_size);
+	message_queue.tail = 0;
+	message_queue.head = 0;
+
+	sem_init(&message_count, 0,0); 
+	sem_init(&consumed_messages_count,0,total_number_of_messages);
+	sem_init(&empty_space, 0, message_queue_size);
 }
 
-int main(int argc, char *argv []){
+double time_in_seconds(){
+    struct timeval tv;
+    double t1;
 
-	/* process and ensure valid inputs */
+    gettimeofday(&tv, NULL);
+    t1 = tv.tv_sec + tv.tv_usec/1000000.0;
+
+    return t1;
+}
+
+/* consumer thread function
+   keep consuming from the message queue until the `consumed_messsages_count` hits 0
+*/
+
+void* dequeue_message(void* arg){
+	int c_id = (int) arg;	
+	while(1){
+			
+		if(sem_trywait(&consumed_messages_count)){
+			break;
+		}
+		
+		//wait for a message to be in the queue
+		sem_wait(&message_count);
+
+		// lock the message queue 
+		pthread_mutex_lock (&lock);
+		int value, sqrt_val;
+	
+	        message_queue.head++;
+	        if (message_queue.head == message_queue_size){
+	 	    message_queue.head = 0;
+	        }   
+
+		/* printing the value if it is a perfect square */
+
+		value = message_queue.array[message_queue.head];
+		sqrt_val = sqrt(value);
+	
+		if (value == (sqrt_val * sqrt_val)){
+		    printf("%d %d %d\n", c_id, value, sqrt_val);
+		}
+
+		pthread_mutex_unlock(&lock);
+
+		//signal producers that there is one less message in the message queue
+		sem_post(&empty_space);
+
+		
+	}
+	return NULL;
+}
+
+/* producer thread function
+   produces using the given algorithm from the manual
+
+   each producer produces a set number of ints
+*/
+
+void* enqueue_message (void* arg){
+	int p_id = (int) arg;
+	int i;
+	for(i = p_id; i < total_number_of_messages; i += producer_count){
+
+	    // make sure that the number of ints in the message queue does not exceed the buffer size
+	    sem_wait(&empty_space);
+
+	    pthread_mutex_lock(&lock);
+
+	    message_queue.tail++;
+	    if (message_queue.tail == message_queue_size){
+		message_queue.tail = 0;
+	    }   
+
+	    message_queue.array[message_queue.tail] = i;
+	    pthread_mutex_unlock(&lock);
+
+	    // let consumers know that there is a message in the queue 
+	    sem_post(&message_count);  
+
+	}
+	return NULL;
+    
+}
+
+
+int main(int argc, char *argv[0]){
 	if (argc < 5){
-		printf("%s\n", "Invalid number of inputs");
+		printf("Invalid number of inputs\n");
 		exit(0);
 	}
 
 	int consumer_count;
-	int producer_count;
-	int buffer_size;
-	int total_message_number;
 
-	total_message_number = atoi(argv[1]);
-	buffer_size = atoi(argv[2]);
+	total_number_of_messages = atoi(argv[1]);
+	message_queue_size = atoi(argv[2]);
 	producer_count = atoi(argv[3]);
 	consumer_count = atoi(argv[4]);
 
-	if (total_message_number < 0 || buffer_size < 0 || producer_count < 0 || consumer_count < 0){
-		printf("%s\n", "All inputs must be positive integers" );
-		exit(0);
+	if (total_number_of_messages < 0 || message_queue_size < 0 || producer_count < 0 || consumer_count < 0){
+		printf("all args must be positive integers");
+		exit(1);
 	}
+
+	init_message_queue();
 
 	double starting_time;
-	double finished_init_time;
 	double ending_time;
-	double execution_time;
+	double total_time;
 
-	/* create and open the message queue */
+	/* create an array of producer and consumer thread ids */
 
-	struct mq_attr attr;
-	mqd_t qdes;
-	mode_t mode = S_IRUSR | S_IWUSR;
-
-	attr.mq_maxmsg  = buffer_size;
-	attr.mq_msgsize = sizeof(int);
-	attr.mq_flags   = 0;
-
-	char *qname = "/mailbox_lab4_extended";
-
-	qdes = mq_open(qname, O_RDWR | O_CREAT, mode, &attr);
-	if(qdes == -1){
-		perror("mq_open() failed");
-		exit(1);
-	}
-
-	/* create and open a consumtion queue
-	   consumtion queue is a mq of size 1 which keeps track of the number of messages
-	   that have been consumed so far
-	*/
-	struct mq_attr c_attr; //consumtion queue attr
-	mqd_t consumtion_queue;
-	mode_t mode_c = S_IRUSR | S_IWUSR;
-
-	c_attr.mq_maxmsg = 1;
-	c_attr.mq_msgsize = sizeof(int);
-	c_attr.mq_flags = 0;
-
-	char * consumtion_queue_name = "/consumtion_queue_mailbox";
-	
-	consumtion_queue = mq_open(consumtion_queue_name, O_RDWR | O_CREAT, mode_c, &c_attr);
-	if (consumtion_queue == -1){
-		perror("mq_open() for consumtion failed");
-		exit(1);
-	}
-
-
-	/* we start by writing the value of `total_message_number` into the consumtion_queue */
-	if(mq_send(consumtion_queue, (char *)&total_message_number, sizeof(int), 0) == -1){
-		perror("mq_send() for consumtion failed");
-	}
-
-
-	
+	pthread_t producer_thread_id[producer_count];
+	pthread_t consumer_thread_id[consumer_count];
 
 	starting_time = time_in_seconds();
 
-	/* loop through and create the producers and consumers processes */
+	/* create the producer and consumer threads */
 
 	int i;
-
-	for(i = 0; i < consumer_count; i++){
-		spawn("./consume_p",argv, qdes, i);
-	}
-
 	for(i = 0; i < producer_count; i++){
-		spawn("./produce_p",argv, qdes, i);
+		pthread_create(&(producer_thread_id[i]), NULL, &enqueue_message, (void*)(i));
 	}
 
-	
-	finished_init_time = time_in_seconds();
+	for(i=0; i < consumer_count; i++){
+		pthread_create(&(consumer_thread_id[i]), NULL, &dequeue_message, (void*)(i));
+	}
 
 
-	/* waiting for all the chiild processes to finsih before continuing */
-	int pid;
-	while (pid = waitpid(-1, NULL, 0)) {
-	   if (errno == ECHILD) {
-	      break;
-	   }
+	/* joing the producer and consumer threads to avoid exiting the main thread
+	   before the other threads have been completed
+	*/
+
+	for(i=0; i < producer_count; i++){
+		pthread_join(producer_thread_id[i], NULL);
+	}
+
+	for(i=0; i < consumer_count; i++){
+		pthread_join(consumer_thread_id[i], NULL);
 	}
 
 	ending_time = time_in_seconds();
+	total_time = ending_time - starting_time;
 
-	/* assumtion: execution time includes the time for initialization */
+	printf("System execution time: %f seconds\n", total_time);
 
-	execution_time = ending_time - starting_time;
+	/* destroying the semaphores */
 
-	printf("System Excution time: %f seconds\n", execution_time);
-
-
-	/* closing and unlinking the message queue and consumtion queue */
-
-	if (mq_close(qdes) == -1){
-		perror("mq_close() failed");
-		exit(2);
-	}
-
-	if(mq_close(consumtion_queue) == -1){
-		perror("mq_close() for cmq failed from main");
-		exit(2);
-	}
-
-	if (mq_unlink(qname) != 0) {
-		perror("mq_unlink() failed");
-		exit(3);
-	}
-
-	if(mq_unlink(consumtion_queue_name) == -1){
-		perror("mq_unlink() failed for cmq from main");
-		exit(3);
-	}
+	sem_destroy(&message_count);
+	sem_destroy(&consumed_messages_count);
+	sem_destroy(&empty_space);
 
 	return 0;
-
-
 }

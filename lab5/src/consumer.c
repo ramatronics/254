@@ -23,8 +23,8 @@ int main(int argc, char *argv[]) {
 	mqd_t qdes;
 	char *qname = "/mailbox_lab4_extended";
 
-	mqd_t consumtion_queue;
-	char *cmqname = "/consumtion_queue_mailbox";
+	mqd_t consumption_queue;
+	char *cmqname = "/consumption_queue_mailbox";
 
 	qdes  = mq_open(qname, O_RDONLY);
 	if (qdes == -1 ) {
@@ -32,8 +32,8 @@ int main(int argc, char *argv[]) {
 		exit(1);
 	}
 	
-	consumtion_queue = mq_open(cmqname, O_RDWR);
-	if (consumtion_queue == -1){
+	consumption_queue = mq_open(cmqname, O_RDWR);
+	if (consumption_queue == -1){
 		perror("mq_open() failed from consumer");
 		exit(1);
 	}
@@ -47,19 +47,19 @@ int main(int argc, char *argv[]) {
 	
 	while(1){
 		int recieved_message;
-		int consumtion_count;
+		int consumption_count;
 
 		/* checking the number of messages that have been consumed in total.
-		   stopping the process if the consumtion count == 0
+		   stopping the process if the consumption count == 0
 		*/
 
-		mq_receive(consumtion_queue, (char *)&consumtion_count, sizeof(int), 0);
-		if (consumtion_count ==  0){
-			mq_send(consumtion_queue, (char *)&consumtion_count, sizeof(int), 0);
+		mq_receive(consumption_queue, (char *)&consumption_count, sizeof(int), 0);
+		if (consumption_count ==  0){
+			mq_send(consumption_queue, (char *)&consumption_count, sizeof(int), 0);
 			break;
 		} else {
-			consumtion_count --;
-			mq_send(consumtion_queue, (char *)&consumtion_count, sizeof(int), 0);
+			consumption_count --;
+			mq_send(consumption_queue, (char *)&consumption_count, sizeof(int), 0);
 		}
 
 		/* dequeue the message from the message queue */
@@ -88,7 +88,7 @@ int main(int argc, char *argv[]) {
 
 	/* closing the consumption queue on the consumer side */
 
-	if(mq_close(consumtion_queue) == -1){
+	if(mq_close(consumption_queue) == -1){
 		perror("mq_close() failed");
 		exit(2);
 	}

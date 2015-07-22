@@ -1,4 +1,4 @@
-To compile the thread implemenation of the producer consumer probel
+To compile the thread implemenation of the producer consumer problem
     $ make thread
 
 To compile the process implementaion of the producer consumer problem
@@ -13,4 +13,20 @@ b: the size of the buffer
 p: the number of producers
 c: the number of consumers
 
+Files Required:
+
+Thread:
+    producer_consumer_thread.c
+
+Process:
+   prodcuer_consumer_process.c
+   producer.c
+   consumer.c
+
+
+
+
+note: when compiling the thread implementation there will be warnings from casting the
+void pointer to an int. These warnings dont seem to have any affects on the results of
+the code
  
